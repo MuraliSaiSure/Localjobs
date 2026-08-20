@@ -1,5 +1,5 @@
 /**
- * Instant Work — API Client
+ * LocalJobs — API Client
  * Connects frontend views to Spring Boot REST endpoints.
  */
 

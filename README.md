@@ -1,17 +1,27 @@
-# ⚡ Instant Work — "Find work. Earn nearby."
+# ⚡ LocalJobs — "Find work. Earn nearby."
 
 > **Hyperlocal Micro-Task and Job Marketplace**  
-> An academic final-year project engineered with Java (Spring Boot) and modern HTML5, CSS3, and JavaScript.
+> An academic final-year project engineered with Java (Spring Boot) and modern HTML5, CSS3, and JavaScript with an advanced Electric Indigo & Oceanic Teal theme.
 
 ---
 
-## 🌟 About Instant Work
+## 🌟 About LocalJobs
 
-**Instant Work** is a two-sided local micro-task marketplace designed to bridge the gap between people who need work done and nearby individuals seeking flexible, immediate earning opportunities.
+**LocalJobs** is a two-sided local micro-task marketplace designed to bridge the gap between people who need work done and nearby individuals seeking flexible, immediate earning opportunities.
 
-Unlike traditional job portals that divide users into rigid "employer" or "worker" tiers, **every Instant Work account has dual capabilities**:
+Unlike traditional job portals that divide users into rigid "employer" or "worker" tiers, **every LocalJobs account has dual capabilities**:
 1. **Post Work**: Create a micro-task offering a fixed cash reward (₹), duration, schedule, and location.
 2. **Find Work**: Discover nearby tasks within walking or commuting distance, accept them, execute them, and receive instant rewards into an integrated wallet.
+
+---
+
+## 🎨 Advanced Design System & Colors
+
+- **Primary Brand Accent**: Electric Indigo & Royal Violet (`#4F46E5` / `#6366F1`)
+- **Secondary Accent**: Oceanic Cyan & Teal (`#06B6D4` / `#0EA5E9`)
+- **Success & Wallet Release**: Emerald Green (`#10B981`)
+- **Reputation & Ratings**: Warm Sunset Gold (`#F59E0B`)
+- **Surfaces**: Frosted glassmorphism, elevated soft shadows, and rounded cards (`Plus Jakarta Sans` typography).
 
 ---
 
@@ -22,8 +32,8 @@ Unlike traditional job portals that divide users into rigid "employer" or "worke
 - 💰 **Simulated Wallet & Escrow Ledger**: Instant reward release from poster to worker's balance with immutable transaction logs.
 - ⭐ **Mutual Reputation & Ratings**: 1-to-5 star rating and written reviews after every completed job.
 - 👥 **Dual-Role Persona Switcher**: Instant switching between test personas (e.g. *Murali Sai - Task Poster* vs *Ravi Kumar - Worker*) to demonstrate the full two-sided workflow.
-- 🛡️ **Admin Control Panel**: Real-time marketplace analytics, user trust verification toggles, and task moderation tools.
-- 🗄️ **Embedded H2 SQL Console**: In-memory relational database ready for quick prototyping and direct SQL testing.
+- 🛡️ **Admin Control Panel**: Real-time marketplace analytics, user trust verification toggles, and task moderation tools (`#admin`).
+- 🗄️ **Embedded H2 SQL Console**: In-memory relational database ready for quick prototyping and direct SQL testing (`/h2-console`).
 
 ---
 
@@ -31,9 +41,9 @@ Unlike traditional job portals that divide users into rigid "employer" or "worke
 
 | Layer | Technology |
 | :--- | :--- |
-| **Frontend** | HTML5, Vanilla CSS3 (Custom Design System), JavaScript (ES6+ Single Page App) |
+| **Frontend** | HTML5, Vanilla CSS3 (Custom Indigo-Teal Design System), JavaScript (ES6+ Single Page App) |
 | **Backend** | Java 21 LTS, Spring Boot 3.3.5 (Spring Web, Spring Data JPA, Hibernate, Validation) |
-| **Database** | In-Memory H2 Database (zero setup required; seeds automatically on boot) |
+| **Database** | In-Memory H2 Database (`jdbc:h2:mem:localjobsdb`) |
 | **Build Tool** | Apache Maven 3.9+ |
 
 ---
@@ -74,8 +84,9 @@ mvn spring-boot:run
 
 ### 3. Open in Browser
 - **Application URL:** [http://localhost:8080](http://localhost:8080)
+- **Admin Panel:** [http://localhost:8080/#admin](http://localhost:8080/#admin)
 - **H2 Database Console:** [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
-  - JDBC URL: `jdbc:h2:mem:instantworkdb`
+  - JDBC URL: `jdbc:h2:mem:localjobsdb`
   - User: `sa`
   - Password: *(blank)*
 

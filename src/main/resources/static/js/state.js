@@ -1,5 +1,5 @@
 /**
- * Instant Work — Central Reactive State
+ * LocalJobs — Central Reactive State
  */
 
 const State = {
@@ -30,7 +30,7 @@ const State = {
 
   async setCurrentUser(user) {
     this.currentUser = user;
-    localStorage.setItem('instant_work_user_id', user.id);
+    localStorage.setItem('localjobs_user_id', user.id);
     this.notify('USER_CHANGED', user);
     await this.refreshNotifications();
   },

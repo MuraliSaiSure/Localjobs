@@ -39,7 +39,7 @@ public class DataInitializer implements CommandLineRunner {
         // 1. Create Initial Users
         User murali = new User(
                 "Murali Sai",
-                "murali@instantwork.local",
+                "murali@localjobs.local",
                 "+91 98765 43210",
                 "Kurnool Road, Ongole",
                 15.5057,
@@ -57,7 +57,7 @@ public class DataInitializer implements CommandLineRunner {
 
         User ravi = new User(
                 "Ravi Kumar",
-                "ravi@instantwork.local",
+                "ravi@localjobs.local",
                 "+91 91234 56789",
                 "Lawyerpet, Ongole",
                 15.5090,
@@ -75,7 +75,7 @@ public class DataInitializer implements CommandLineRunner {
 
         User ananya = new User(
                 "Ananya Sharma",
-                "ananya@instantwork.local",
+                "ananya@localjobs.local",
                 "+91 99887 76655",
                 "Trunk Road, Ongole",
                 15.5020,

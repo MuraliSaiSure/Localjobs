@@ -9,10 +9,10 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.instantwork</groupId>
-	<artifactId>instant-work</artifactId>
+	<artifactId>localjobs</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>instant-work</name>
-	<description>Instant Work - Hyperlocal Micro-Task and Job Marketplace</description>
+	<name>localjobs</name>
+	<description>LocalJobs - Hyperlocal Micro-Task and Job Marketplace</description>
 
 	<properties>
 		<java.version>21</java.version>

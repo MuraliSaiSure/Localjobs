@@ -1,6 +1,6 @@
 /**
- * INSTANT WORK — Master Application Logic
- * Implements interactive micro-task marketplace with complete lifecycle support.
+ * LOCALJOBS — Master Application Logic
+ * Implements interactive hyperlocal micro-task marketplace with complete lifecycle support.
  */
 
 // Categories metadata with icons
@@ -39,7 +39,7 @@ async function initApp() {
     State.allUsers = users || [];
 
     // 2. Select initial active user (e.g. Murali Sai or stored user)
-    const savedUserId = localStorage.getItem('instant_work_user_id');
+    const savedUserId = localStorage.getItem('localjobs_user_id') || localStorage.getItem('instant_work_user_id');
     let initialUser = State.allUsers.find(u => u.id == savedUserId);
     if (!initialUser && State.allUsers.length > 0) {
       initialUser = State.allUsers[0];
@@ -927,7 +927,7 @@ async function submitRatingReview() {
     fromUserId: State.currentUser.id,
     toUserId: currentRatingContext.toUserId,
     rating: selectedRating,
-    reviewText: text || 'Great experience working together on Instant Work!',
+    reviewText: text || 'Great experience working together on LocalJobs!',
     role: currentRatingContext.role
   };
 
