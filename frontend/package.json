@@ -1,0 +1,13 @@
+{
+  "name": "localjobs-frontend",
+  "version": "1.0.0",
+  "description": "LocalJobs Frontend Single Page App",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve -l 3000 .",
+    "start": "npx serve -l 3000 ."
+  },
+  "keywords": ["hyperlocal", "marketplace", "frontend"],
+  "author": "Murali Sai",
+  "license": "MIT"
+}

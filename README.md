@@ -1,7 +1,7 @@
 # ⚡ LocalJobs — "Find work. Earn nearby."
 
 > **Hyperlocal Micro-Task and Job Marketplace**  
-> An academic final-year project engineered with Java (Spring Boot) and modern HTML5, CSS3, and JavaScript with an advanced Electric Indigo & Oceanic Teal theme.
+> An academic final-year project engineered with a modular **Frontend** (HTML5, Vanilla CSS3, JS with Vercel support) and **Backend** (Java 21 LTS, Spring Boot 3.3.5, H2 Database).
 
 ---
 
@@ -15,107 +15,95 @@ Unlike traditional job portals that divide users into rigid "employer" or "worke
 
 ---
 
+## 📁 Modular Project Structure
+
+The project is structured into two clean, self-contained directories:
+
+```
+Localjobs/
+├── 🎨 frontend/                  # Standalone Frontend Application (SPA)
+│   ├── index.html               # Main application layout & modals
+│   ├── css/
+│   │   └── style.css            # Indigo-Teal design system & responsive rules
+│   ├── js/
+│   │   ├── api.js               # REST client with dynamic API_BASE detection
+│   │   ├── state.js             # Central reactive state & persona switcher
+│   │   └── app.js               # UI rendering & 5-stage lifecycle actions
+│   ├── vercel.json              # 1-Click Vercel deployment configuration
+│   ├── package.json             # Optional local serve scripts
+│   └── README.md                # Frontend documentation
+│
+├── ☕ backend/                   # Spring Boot 3.3.5 REST API Service
+│   ├── pom.xml                  # Maven dependencies & build configuration
+│   ├── src/main/java/           # Java 21 controllers, services, entities, DTOs
+│   ├── src/main/resources/      # application.properties & database setup
+│   └── README.md                # Backend documentation
+│
+├── test_suite.ps1               # Automated end-to-end integration test runner
+├── .gitignore
+└── README.md
+```
+
+---
+
 ## 🎨 Advanced Design System & Colors
 
-- **Primary Brand Accent**: Electric Indigo & Royal Violet (`#4F46E5` / `#6366F1`)
+- **Primary Accent**: Electric Indigo & Royal Violet (`#4F46E5` / `#6366F1`)
 - **Secondary Accent**: Oceanic Cyan & Teal (`#06B6D4` / `#0EA5E9`)
-- **Success & Wallet Release**: Emerald Green (`#10B981`)
+- **Success & Wallet Payouts**: Emerald Green (`#10B981`)
 - **Reputation & Ratings**: Warm Sunset Gold (`#F59E0B`)
 - **Surfaces**: Frosted glassmorphism, elevated soft shadows, and rounded cards (`Plus Jakarta Sans` typography).
 
 ---
 
-## 🚀 Core Features
+## 🚀 How to Run Locally
 
-- 📍 **Hyperlocal Geolocation Engine**: Real-time Haversine distance calculation and filtering (within 1 km, 3 km, 5 km, 10 km).
-- 🔄 **5-Stage Task Lifecycle**: `OPEN` $\rightarrow$ `ACCEPTED` $\rightarrow$ `IN_PROGRESS` $\rightarrow$ `COMPLETED` $\rightarrow$ `PAYMENT_RELEASED`.
-- 💰 **Simulated Wallet & Escrow Ledger**: Instant reward release from poster to worker's balance with immutable transaction logs.
-- ⭐ **Mutual Reputation & Ratings**: 1-to-5 star rating and written reviews after every completed job.
-- 👥 **Dual-Role Persona Switcher**: Instant switching between test personas (e.g. *Murali Sai - Task Poster* vs *Ravi Kumar - Worker*) to demonstrate the full two-sided workflow.
-- 🛡️ **Admin Control Panel**: Real-time marketplace analytics, user trust verification toggles, and task moderation tools (`#admin`).
-- 🗄️ **Embedded H2 SQL Console**: In-memory relational database ready for quick prototyping and direct SQL testing (`/h2-console`).
-
----
-
-## 🛠️ Technology Stack
-
-| Layer | Technology |
-| :--- | :--- |
-| **Frontend** | HTML5, Vanilla CSS3 (Custom Indigo-Teal Design System), JavaScript (ES6+ Single Page App) |
-| **Backend** | Java 21 LTS, Spring Boot 3.3.5 (Spring Web, Spring Data JPA, Hibernate, Validation) |
-| **Database** | In-Memory H2 Database (`jdbc:h2:mem:localjobsdb`) |
-| **Build Tool** | Apache Maven 3.9+ |
-
----
-
-## 📋 Task Categories Supported
-
-- 🍽️ **Restaurants** (Kitchen help, dinner rush service, counter support)
-- 🏬 **Retail & Shops** (Sales assistant, inventory stocking, cashiering)
-- 🎉 **Events** (Event coordination, symposium registration, ushering)
-- 🏢 **Office** (Filing, document scanning, administrative assistance)
-- 🏗️ **Construction** (Site assistance, material moving)
-- 🚚 **Delivery** (Hyperlocal deliveries, field tasks)
-- 💻 **IT & Software** (Computer setup, network verification, testing)
-- ⌨️ **Data Entry** (Spreadsheet entry, invoice transcription)
-- 🎓 **Education & Labs** (Lab setup, student tutoring)
-- 📦 **Warehouse** (Boxing, packing, barcode labeling)
-- 📈 **Sales & Marketing** (Flyer distribution, local promotion)
-- 💼 **Other legitimate local micro-work**
-
----
-
-## 🚦 Getting Started
-
-### Prerequisites
-- **Java 21 LTS** or higher
-- **Maven 3.9+**
-
-### 1. Clone the Repository
+### 1. Start the Backend API (Port 8080)
 ```bash
-git clone https://github.com/MuraliSaiSure/Localjobs.git
-cd Localjobs
-```
-
-### 2. Run the Application
-```bash
+cd backend
 mvn spring-boot:run
 ```
+- Backend REST API: [http://localhost:8080/api](http://localhost:8080/api)
+- H2 SQL Database Console: [http://localhost:8080/h2-console](http://localhost:8080/h2-console) (JDBC URL: `jdbc:h2:mem:localjobsdb`, user: `sa`, password: blank)
 
-### 3. Open in Browser
-- **Application URL:** [http://localhost:8080](http://localhost:8080)
-- **Admin Panel:** [http://localhost:8080/#admin](http://localhost:8080/#admin)
-- **H2 Database Console:** [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
-  - JDBC URL: `jdbc:h2:mem:localjobsdb`
-  - User: `sa`
-  - Password: *(blank)*
+### 2. Launch the Frontend
+You can run the frontend in any of the following ways:
+- **Option A (Direct in Browser):** Double-click `frontend/index.html`
+- **Option B (Local Dev Server):**
+  ```bash
+  cd frontend
+  npx serve -l 3000 .
+  ```
+  Open [http://localhost:3000](http://localhost:3000) (the frontend automatically connects to the backend at `http://localhost:8080`).
+- **Option C (Embedded in Spring Boot):** Open [http://localhost:8080](http://localhost:8080)
 
 ---
 
-## 📡 REST API Documentation
+## ☁️ Deployment (Vercel & Cloud)
 
-### Task Endpoints (`/api/tasks`)
+### Frontend on Vercel:
+1. Push this repository to GitHub.
+2. In [Vercel Dashboard](https://vercel.com), import the `Localjobs` repository.
+3. In **Project Settings**, set **Root Directory** to `frontend`.
+4. Deploy! The `vercel.json` ensures all routes route cleanly to `index.html`.
+
+---
+
+## 📡 REST API Endpoints Overview
+
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/tasks` | Discover tasks with query filters (`category`, `maxDistance`, `minReward`, `keyword`, `userLat`, `userLng`) |
-| `GET` | `/api/tasks/{id}` | Get single task details |
 | `POST` | `/api/tasks` | Post a new micro-task |
-| `PUT` | `/api/tasks/{id}/accept?workerId={id}` | Accept a task (`OPEN` $\rightarrow$ `ACCEPTED`) |
-| `PUT` | `/api/tasks/{id}/start?workerId={id}` | Start working (`ACCEPTED` $\rightarrow$ `IN_PROGRESS`) |
+| `PUT` | `/api/tasks/{id}/accept?workerId={id}` | Accept task (`OPEN` $\rightarrow$ `ACCEPTED`) |
+| `PUT` | `/api/tasks/{id}/start?workerId={id}` | Start task (`ACCEPTED` $\rightarrow$ `IN_PROGRESS`) |
 | `PUT` | `/api/tasks/{id}/complete?workerId={id}` | Mark completed (`IN_PROGRESS` $\rightarrow$ `COMPLETED`) |
-| `PUT` | `/api/tasks/{id}/release-payment?posterId={id}` | Confirm & release reward (`COMPLETED` $\rightarrow$ `PAYMENT_RELEASED`) |
-| `GET` | `/api/tasks/my-posted?userId={id}` | Tasks posted by user |
-| `GET` | `/api/tasks/my-accepted?workerId={id}` | Tasks accepted by user |
-
-### User & Wallet Endpoints
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/users` | List all users (persona switching) |
-| `GET` | `/api/users/{id}` | Get user profile and stats |
-| `POST` | `/api/users/register` | Register new user account |
-| `GET` | `/api/wallet/{userId}` | Get wallet balance and transactions |
-| `POST` | `/api/ratings` | Submit 1–5 star rating and review |
-| `GET` | `/api/admin/stats` | Platform metrics for Admin dashboard |
+| `PUT` | `/api/tasks/{id}/release-payment?posterId={id}` | Release reward to worker wallet |
+| `GET` | `/api/wallet/{userId}` | Get user wallet balance & transaction ledger |
+| `POST` | `/api/ratings` | Submit 1–5 star rating & review |
+| `GET` | `/api/admin/stats` | Platform statistics for Admin Dashboard |
+| `PUT` | `/api/admin/users/{id}/toggle-verify` | Toggle verified user badge |
+| `DELETE` | `/api/admin/tasks/{id}` | Delete / moderate spam task |
 
 ---
 
