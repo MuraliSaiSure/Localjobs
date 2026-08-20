@@ -4,6 +4,7 @@ import com.instantwork.dto.TaskCreateRequest;
 import com.instantwork.model.Task;
 import com.instantwork.model.TaskStatus;
 import com.instantwork.model.User;
+import com.instantwork.model.VerificationStatus;
 import com.instantwork.repository.TaskRepository;
 import com.instantwork.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -109,6 +110,11 @@ public class TaskService {
         User poster = userRepository.findById(request.getPosterId())
                 .orElseThrow(() -> new RuntimeException("Poster user not found: " + request.getPosterId()));
 
+        // Verification Requirement Guard
+        if (!Boolean.TRUE.equals(poster.getVerified()) && poster.getVerificationStatus() != VerificationStatus.VERIFIED) {
+            throw new IllegalStateException("Please complete identity verification to use this feature.");
+        }
+
         Task task = new Task(
                 poster.getId(),
                 poster.getName(),
@@ -156,6 +162,16 @@ public class TaskService {
 
         User worker = userRepository.findById(workerId)
                 .orElseThrow(() -> new RuntimeException("Worker user not found: " + workerId));
+
+        // Verification Requirement Guard
+        if (!Boolean.TRUE.equals(worker.getVerified()) && worker.getVerificationStatus() != VerificationStatus.VERIFIED) {
+            throw new IllegalStateException("Please complete identity verification to use this feature.");
+        }
+
+        User poster = userRepository.findById(task.getPosterId()).orElse(null);
+        if (poster != null && (poster.getBlockedUserIds().contains(workerId) || worker.getBlockedUserIds().contains(poster.getId()))) {
+            throw new IllegalStateException("Interaction restricted due to user blocking settings.");
+        }
 
         task.setWorkerId(worker.getId());
         task.setWorkerName(worker.getName());

@@ -19,8 +19,63 @@ const getApiBase = () => {
 
 const API_BASE = getApiBase();
 
+const getAdminHeaders = () => {
+  const token = localStorage.getItem('localjobs_admin_token') || 'ADMIN_SESSION_ACTIVE';
+  return {
+    'Content-Type': 'application/json',
+    'X-Admin-Role': 'ADMIN',
+    'Authorization': `Bearer ${token}`
+  };
+};
+
 const API = {
-  // Users
+  // ==========================================================================
+  // AUTHENTICATION & USERS
+  // ==========================================================================
+  async checkUsername(username) {
+    const res = await fetch(`${API_BASE}/api/auth/check-username?username=${encodeURIComponent(username)}`);
+    return res.json();
+  },
+
+  async signupUser(signupData) {
+    const res = await fetch(`${API_BASE}/api/auth/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(signupData)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Signup failed');
+    }
+    return data;
+  },
+
+  async loginUser(usernameOrEmail, password) {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usernameOrEmail, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Invalid credentials');
+    }
+    return data;
+  },
+
+  async adminLogin(username, password) {
+    const res = await fetch(`${API_BASE}/api/auth/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Admin authentication failed');
+    }
+    return data;
+  },
+
   async getUsers() {
     const res = await fetch(`${API_BASE}/api/users`);
     return res.json();
@@ -40,18 +95,6 @@ const API = {
     return res.json();
   },
 
-  async loginUser(emailOrPhone, password) {
-    const res = await fetch(`${API_BASE}/api/users/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ emailOrPhone, password })
-    });
-    if (!res.ok) {
-      throw new Error('Invalid email or password');
-    }
-    return res.json();
-  },
-
   async updateUser(id, userData) {
     const res = await fetch(`${API_BASE}/api/users/${id}`, {
       method: 'PUT',
@@ -61,7 +104,59 @@ const API = {
     return res.json();
   },
 
-  // Tasks
+  // ==========================================================================
+  // IDENTITY VERIFICATION (MOCK KYC)
+  // ==========================================================================
+  async submitVerification(payload) {
+    const res = await fetch(`${API_BASE}/api/verification/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Verification submission failed');
+    }
+    return data;
+  },
+
+  // ==========================================================================
+  // SECURITY, REPORTS & BLOCKING
+  // ==========================================================================
+  async fileReport(reportData) {
+    const res = await fetch(`${API_BASE}/api/security/report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reportData)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to file report');
+    }
+    return data;
+  },
+
+  async blockUser(userId, targetUserId) {
+    const res = await fetch(`${API_BASE}/api/security/block`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, targetUserId })
+    });
+    return res.json();
+  },
+
+  async unblockUser(userId, targetUserId) {
+    const res = await fetch(`${API_BASE}/api/security/unblock`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, targetUserId })
+    });
+    return res.json();
+  },
+
+  // ==========================================================================
+  // TASKS & REPUTATION
+  // ==========================================================================
   async getTasks(params = {}) {
     const query = new URLSearchParams();
     if (params.category && params.category !== 'All') query.append('category', params.category);
@@ -90,53 +185,46 @@ const API = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(taskData)
     });
-    return res.json();
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || data.error || 'Failed to publish task');
+    }
+    return data;
   },
 
   async acceptTask(taskId, workerId) {
     const res = await fetch(`${API_BASE}/api/tasks/${taskId}/accept?workerId=${workerId}`, {
       method: 'PUT'
     });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || data.error || 'Failed to accept task');
+    }
+    return data;
+  },
+
+  async startTask(taskId) {
+    const res = await fetch(`${API_BASE}/api/tasks/${taskId}/start`, { method: 'PUT' });
     return res.json();
   },
 
-  async startTask(taskId, workerId) {
-    const res = await fetch(`${API_BASE}/api/tasks/${taskId}/start?workerId=${workerId}`, {
-      method: 'PUT'
-    });
+  async completeTask(taskId) {
+    const res = await fetch(`${API_BASE}/api/tasks/${taskId}/complete`, { method: 'PUT' });
     return res.json();
   },
 
-  async completeTask(taskId, workerId) {
-    const res = await fetch(`${API_BASE}/api/tasks/${taskId}/complete?workerId=${workerId}`, {
-      method: 'PUT'
-    });
+  async releasePayment(taskId) {
+    const res = await fetch(`${API_BASE}/api/tasks/${taskId}/release-payment`, { method: 'PUT' });
     return res.json();
   },
 
-  async releasePayment(taskId, posterId) {
-    const res = await fetch(`${API_BASE}/api/tasks/${taskId}/release-payment?posterId=${posterId}`, {
-      method: 'PUT'
-    });
-    return res.json();
-  },
-
-  async getMyPostedTasks(userId, status) {
-    let url = `${API_BASE}/api/tasks/my-posted?userId=${userId}`;
-    if (status) url += `&status=${status}`;
-    const res = await fetch(url);
-    return res.json();
-  },
-
-  async getMyAcceptedTasks(workerId, status) {
-    let url = `${API_BASE}/api/tasks/my-accepted?workerId=${workerId}`;
-    if (status) url += `&status=${status}`;
-    const res = await fetch(url);
+  async getMyTasks(userId, role = 'all') {
+    const res = await fetch(`${API_BASE}/api/tasks/user/${userId}?role=${role}`);
     return res.json();
   },
 
   // Wallet
-  async getWalletSummary(userId) {
+  async getWallet(userId) {
     const res = await fetch(`${API_BASE}/api/wallet/${userId}`);
     return res.json();
   },
@@ -146,50 +234,111 @@ const API = {
     return res.json();
   },
 
-  // Ratings
-  async submitRating(ratingData) {
-    const res = await fetch(`${API_BASE}/api/ratings`, {
+  async addFunds(userId, amount) {
+    const res = await fetch(`${API_BASE}/api/wallet/${userId}/deposit?amount=${amount}`, { method: 'POST' });
+    return res.json();
+  },
+
+  // Reviews
+  async submitReview(reviewData) {
+    const res = await fetch(`${API_BASE}/api/reviews`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(ratingData)
+      body: JSON.stringify(reviewData)
     });
     return res.json();
   },
 
-  async getReviewsForUser(userId) {
-    const res = await fetch(`${API_BASE}/api/ratings/user/${userId}`);
+  async getUserReviews(userId) {
+    const res = await fetch(`${API_BASE}/api/reviews/user/${userId}`);
     return res.json();
   },
 
   // Notifications
   async getNotifications(userId) {
-    const res = await fetch(`${API_BASE}/api/notifications?userId=${userId}`);
+    const res = await fetch(`${API_BASE}/api/notifications/user/${userId}`);
     return res.json();
   },
 
-  async markNotificationsRead(userId) {
-    const res = await fetch(`${API_BASE}/api/notifications/mark-read?userId=${userId}`, {
-      method: 'PUT'
+  async markNotificationRead(id) {
+    const res = await fetch(`${API_BASE}/api/notifications/${id}/read`, { method: 'PUT' });
+    return res.json();
+  },
+
+  async markAllNotificationsRead(userId) {
+    const res = await fetch(`${API_BASE}/api/notifications/user/${userId}/read-all`, { method: 'PUT' });
+    return res.json();
+  },
+
+  // ==========================================================================
+  // ADMIN CONTROL PANEL (PROTECTED WITH RBAC)
+  // ==========================================================================
+  async getAdminStats() {
+    const res = await fetch(`${API_BASE}/api/admin/stats`, {
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Unauthorized admin access');
+    return res.json();
+  },
+
+  async getPendingVerifications() {
+    const res = await fetch(`${API_BASE}/api/admin/verifications/pending`, {
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Unauthorized admin access');
+    return res.json();
+  },
+
+  async reviewVerification(userId, decision, remarks) {
+    const adminUsername = localStorage.getItem('localjobs_admin_username') || 'admin';
+    const res = await fetch(`${API_BASE}/api/admin/verifications/review`, {
+      method: 'POST',
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ adminUsername, userId, decision, remarks })
     });
     return res.json();
   },
 
-  // Admin
-  async getAdminStats() {
-    const res = await fetch(`${API_BASE}/api/admin/stats`);
+  async getAdminReports() {
+    const res = await fetch(`${API_BASE}/api/admin/reports`, {
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Unauthorized admin access');
+    return res.json();
+  },
+
+  async resolveReport(reportId, decision, notes) {
+    const adminUsername = localStorage.getItem('localjobs_admin_username') || 'admin';
+    const res = await fetch(`${API_BASE}/api/admin/reports/${reportId}/resolve`, {
+      method: 'POST',
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ adminUsername, decision, notes })
+    });
+    return res.json();
+  },
+
+  async updateAccountStatus(userId, newStatus, reason) {
+    const adminUsername = localStorage.getItem('localjobs_admin_username') || 'admin';
+    const res = await fetch(`${API_BASE}/api/admin/users/${userId}/account-status`, {
+      method: 'PUT',
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ adminUsername, newStatus, reason })
+    });
+    return res.json();
+  },
+
+  async getAdminAuditLogs() {
+    const res = await fetch(`${API_BASE}/api/admin/audit-logs`, {
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Unauthorized admin access');
     return res.json();
   },
 
   async deleteAdminTask(taskId) {
     const res = await fetch(`${API_BASE}/api/admin/tasks/${taskId}`, {
-      method: 'DELETE'
-    });
-    return res.json();
-  },
-
-  async toggleUserVerify(userId) {
-    const res = await fetch(`${API_BASE}/api/admin/users/${userId}/toggle-verify`, {
-      method: 'PUT'
+      method: 'DELETE',
+      headers: getAdminHeaders()
     });
     return res.json();
   }

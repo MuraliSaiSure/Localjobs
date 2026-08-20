@@ -74,8 +74,8 @@
         <button class="nav-link" data-screen="profile" onclick="navigateTo('profile')">
           <i class="fa-solid fa-user"></i> Profile
         </button>
-        <button class="nav-link" data-screen="admin" onclick="navigateTo('admin')" style="background:#f3e8ff; color:#7e22ce; border: 1px solid #d8b4fe; font-weight:700;">
-          <i class="fa-solid fa-shield-halved"></i> Admin
+        <button class="nav-link" data-screen="verify" onclick="navigateTo('verify')" style="background:#eef2ff; color:var(--primary); font-weight:700;">
+          <i class="fa-solid fa-id-card"></i> Verify ID <span id="nav-verify-badge" style="font-size:0.68rem; background:#fee2e2; color:#ef4444; padding:2px 6px; border-radius:999px; display:none;">!</span>
         </button>
       </nav>
 
@@ -315,6 +315,10 @@
           <button class="btn btn-primary btn-lg" onclick="openAuthModal('register')"><i class="fa-solid fa-user-plus"></i> Create Free Account</button>
           <button class="btn btn-outline-white btn-lg" onclick="openAuthModal('login')"><i class="fa-solid fa-right-to-bracket"></i> Sign In to Dashboard</button>
         </div>
+
+        <div style="margin-top:2.5rem; text-align:center; font-size:0.8rem; color:#94a3b8; border-top:1px solid rgba(255,255,255,0.1); padding-top:1.25rem;">
+          LocalJobs Hyperlocal Marketplace • <a href="admin.html" target="_blank" style="color:#c084fc; font-weight:700; text-decoration:none;"><i class="fa-solid fa-shield-halved"></i> Administrator Portal Access</a>
+        </div>
       </div>
     </section>
 
@@ -325,7 +329,7 @@
       <!-- Hero Banner -->
       <div class="hero-banner">
         <div class="hero-greeting">
-          <span>Good day, <strong id="hero-user-name">Murali</strong> 👋</span>
+          <span>Good day, <strong id="hero-user-name">Murali</strong> 👋 <span id="hero-verified-badge" class="task-status-badge status-payment_released" style="font-size:0.7rem; vertical-align:middle; padding:2px 8px; margin-left:6px;"><i class="fa-solid fa-circle-check"></i> Verified User</span></span>
           <span class="location-pill"><i class="fa-solid fa-location-dot"></i> <span id="hero-location-text">Ongole, AP</span></span>
         </div>
         <h1 class="hero-title">Ready to earn nearby today?</h1>
@@ -337,8 +341,8 @@
           <button class="btn btn-outline-white" onclick="navigateTo('post')">
             <i class="fa-solid fa-plus"></i> Post a Task
           </button>
-          <button class="btn btn-outline-white" onclick="navigateTo('admin')" style="background:rgba(126,34,206,0.3); border-color:#e9d5ff;">
-            <i class="fa-solid fa-shield-halved"></i> Admin Panel
+          <button class="btn btn-outline-white" onclick="navigateTo('verify')" id="hero-verify-btn" style="display:none; background:#fee2e2; color:#ef4444; border-color:#fca5a5;">
+            <i class="fa-solid fa-id-card"></i> Verify Identity Now
           </button>
         </div>
       </div>
@@ -672,115 +676,119 @@
     </section>
 
     <!-- ==================================================================
-         7. ADMIN DASHBOARD SCREEN
+         7. IDENTITY VERIFICATION SCREEN (MOCK KYC)
          ================================================================== -->
-    <section id="screen-admin" class="screen-view">
+    <section id="screen-verify" class="screen-view">
       <div class="section-header">
         <div>
-          <h2 class="section-title" style="color: #7e22ce;"><i class="fa-solid fa-shield-halved"></i> Platform Admin Control Panel</h2>
-          <p class="section-subtitle">Real-time marketplace oversight, user verification, and task moderation</p>
-        </div>
-        <a href="/h2-console" target="_blank" class="btn btn-outline btn-sm">
-          <i class="fa-solid fa-database"></i> Open H2 SQL Console
-        </a>
-      </div>
-
-      <!-- Admin Platform KPIs -->
-      <div class="wallet-stats-grid">
-        <div class="stat-card" style="border-left: 4px solid #7e22ce;">
-          <div class="stat-icon" style="background: #f3e8ff; color: #7e22ce;">
-            <i class="fa-solid fa-users"></i>
-          </div>
-          <div class="stat-info">
-            <span class="stat-title">Total Users</span>
-            <span class="stat-value" id="admin-total-users">0</span>
-            <span class="stat-subtitle">Registered dual-accounts</span>
-          </div>
-        </div>
-
-        <div class="stat-card" style="border-left: 4px solid var(--primary);">
-          <div class="stat-icon" style="background: var(--primary-light); color: var(--primary);">
-            <i class="fa-solid fa-list-check"></i>
-          </div>
-          <div class="stat-info">
-            <span class="stat-title">Total Tasks</span>
-            <span class="stat-value" id="admin-total-tasks">0</span>
-            <span class="stat-subtitle"><span id="admin-open-tasks">0</span> Open • <span id="admin-active-tasks">0</span> Active</span>
-          </div>
-        </div>
-
-        <div class="stat-card" style="border-left: 4px solid var(--success);">
-          <div class="stat-icon" style="background: var(--success-light); color: var(--success);">
-            <i class="fa-solid fa-indian-rupee-sign"></i>
-          </div>
-          <div class="stat-info">
-            <span class="stat-title">Gross Task Value</span>
-            <span class="stat-value" id="admin-total-gmv">₹0</span>
-            <span class="stat-subtitle">Total rewards offered</span>
-          </div>
-        </div>
-
-        <div class="stat-card" style="border-left: 4px solid var(--accent-amber);">
-          <div class="stat-icon" style="background: var(--accent-amber-light); color: var(--accent-amber);">
-            <i class="fa-solid fa-trophy"></i>
-          </div>
-          <div class="stat-info">
-            <span class="stat-title">Completed Jobs</span>
-            <span class="stat-value" id="admin-completed-tasks">0</span>
-            <span class="stat-subtitle"><span id="admin-total-reviews">0</span> verified reviews</span>
-          </div>
+          <h2 class="section-title"><i class="fa-solid fa-id-card-clip text-primary"></i> Identity Verification</h2>
+          <p class="section-subtitle">Identity verification helps protect both job creators and job seekers and creates a safer, more trustworthy platform.</p>
         </div>
       </div>
 
-      <!-- Admin Users Management Table -->
-      <div class="transactions-card" style="margin-bottom: 2rem;">
-        <div class="section-header">
-          <h3 class="section-title" style="font-size: 1.15rem;"><i class="fa-solid fa-user-shield"></i> User Accounts & Trust Management</h3>
-          <span class="section-subtitle">Toggle identity verification</span>
+      <!-- Live Verification Status Card -->
+      <div id="verify-status-banner" class="transactions-card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--primary);">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <div style="display:flex; align-items:center; gap:1rem;">
+            <div id="verify-status-icon-box" style="width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; background:#fee2e2; color:#ef4444;">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+              <div style="font-size:0.8rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Current Account Status</div>
+              <div id="verify-status-title" style="font-size:1.15rem; font-weight:800; color:var(--secondary);">Not Verified</div>
+            </div>
+          </div>
+          <span id="verify-status-badge" class="task-status-badge status-in_progress" style="background:#fee2e2; color:#b91c1c;">
+            UNVERIFIED
+          </span>
         </div>
-        <div style="overflow-x: auto;">
-          <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
-            <thead>
-              <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
-                <th style="padding: 0.75rem 0.5rem;">User</th>
-                <th style="padding: 0.75rem 0.5rem;">Contact</th>
-                <th style="padding: 0.75rem 0.5rem;">Location</th>
-                <th style="padding: 0.75rem 0.5rem;">Rating / Jobs</th>
-                <th style="padding: 0.75rem 0.5rem;">Balance</th>
-                <th style="padding: 0.75rem 0.5rem;">Status</th>
-                <th style="padding: 0.75rem 0.5rem; text-align: right;">Action</th>
-              </tr>
-            </thead>
-            <tbody id="admin-users-table-body">
-              <!-- Dynamic Users -->
-            </tbody>
-          </table>
+
+        <div id="verify-details-summary" style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border-subtle); display:none;">
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; font-size:0.85rem;">
+            <div><span style="color:var(--text-muted);">Document Type:</span> <strong id="verify-summary-doc">AADHAAR</strong></div>
+            <div><span style="color:var(--text-muted);">Masked ID:</span> <strong id="verify-summary-masked" style="font-family:monospace;">XXXX-XXXX-XXXX</strong></div>
+            <div><span style="color:var(--text-muted);">Name on ID:</span> <strong id="verify-summary-name">Murali Sai</strong></div>
+          </div>
+          <div id="verify-remarks-box" style="margin-top:0.75rem; font-size:0.82rem; color:var(--text-muted);"></div>
         </div>
       </div>
 
-      <!-- Admin Tasks Moderation Table -->
-      <div class="transactions-card">
-        <div class="section-header">
-          <h3 class="section-title" style="font-size: 1.15rem;"><i class="fa-solid fa-clipboard-check"></i> Platform Tasks Moderation</h3>
-          <span class="section-subtitle">Review, inspect, or remove tasks</span>
+      <!-- Educational Privacy Alert -->
+      <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: var(--radius-md); padding: 1.2rem; margin-bottom: 1.5rem; display: flex; gap: 0.85rem;">
+        <i class="fa-solid fa-shield-heart text-primary" style="font-size: 1.5rem; margin-top: 2px;"></i>
+        <div>
+          <strong style="color: var(--secondary); font-size: 0.95rem;">Privacy-First Academic Demonstration</strong>
+          <p style="font-size: 0.85rem; color: #4338ca; margin: 0.25rem 0 0 0; line-height: 1.45;">
+            In compliance with student project privacy guidelines, your raw document numbers are <strong>never stored in plain text</strong>. 
+            The system instantly generates a non-sensitive masked reference (e.g. <code>XXXX-XXXX-1234</code>) to ensure maximum confidentiality.
+          </p>
         </div>
-        <div style="overflow-x: auto;">
-          <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
-            <thead>
-              <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
-                <th style="padding: 0.75rem 0.5rem;">Task</th>
-                <th style="padding: 0.75rem 0.5rem;">Category</th>
-                <th style="padding: 0.75rem 0.5rem;">Reward</th>
-                <th style="padding: 0.75rem 0.5rem;">Poster</th>
-                <th style="padding: 0.75rem 0.5rem;">Status</th>
-                <th style="padding: 0.75rem 0.5rem; text-align: right;">Action</th>
-              </tr>
-            </thead>
-            <tbody id="admin-tasks-table-body">
-              <!-- Dynamic Tasks -->
-            </tbody>
-          </table>
-        </div>
+      </div>
+
+      <!-- Verification Submission Form (Visible when NOT_VERIFIED, REJECTED, or REQUIRES_REVERIFICATION) -->
+      <div id="verify-form-container" class="form-card">
+        <h3 class="form-card-title" style="margin-bottom: 0.5rem;"><i class="fa-solid fa-file-shield text-primary"></i> Submit Identity Document</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Select your government identity document type and enter your details for administrator review.
+        </p>
+
+        <form id="kyc-verification-form" onsubmit="handleVerificationSubmit(event)">
+          <!-- Document Selector -->
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">Select Document Type <span>*</span></label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <label id="doc-choice-aadhaar" style="border: 2px solid var(--primary); background: #f5f3ff; border-radius: var(--radius-md); padding: 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;" onclick="selectDocType('AADHAAR')">
+                <input type="radio" name="kyc-doc-type" value="AADHAAR" checked style="accent-color: var(--primary);">
+                <div>
+                  <strong style="display: block; font-size: 0.95rem; color: var(--secondary);"><i class="fa-solid fa-id-card"></i> Aadhaar Card</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">12-digit UIDAI format</span>
+                </div>
+              </label>
+
+              <label id="doc-choice-pan" style="border: 2px solid var(--border-color); background: white; border-radius: var(--radius-md); padding: 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;" onclick="selectDocType('PAN')">
+                <input type="radio" name="kyc-doc-type" value="PAN" style="accent-color: var(--primary);">
+                <div>
+                  <strong style="display: block; font-size: 0.95rem; color: var(--secondary);"><i class="fa-solid fa-credit-card"></i> PAN Card</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">10-char Alphanumeric</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Name on Document -->
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Full Name as per Document <span>*</span></label>
+            <input type="text" id="kyc-name-on-doc" class="form-control" placeholder="Enter your full legal name" required>
+          </div>
+
+          <!-- Document Number -->
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" id="kyc-number-label">Aadhaar Card Number <span>*</span></label>
+            <input type="text" id="kyc-doc-number" class="form-control" placeholder="e.g. 5432 8765 1234" maxlength="16" required>
+            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; display: block;">
+              <i class="fa-solid fa-lock text-success"></i> Will be saved only as <span id="kyc-mask-preview" style="font-family:monospace; font-weight:700; color:var(--primary);">XXXX-XXXX-1234</span>
+            </span>
+          </div>
+
+          <!-- Mock Document Upload -->
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label">Upload Document Photo (Mock Upload) <span>*</span></label>
+            <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; background: #fafafa;">
+              <i class="fa-solid fa-cloud-arrow-up text-primary" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+              <div style="font-size: 0.88rem; font-weight: 600; color: var(--secondary);">Click or Drag ID Image Here</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Supports JPG, PNG, PDF up to 5MB</div>
+              <input type="file" id="kyc-file-input" style="display: none;" accept="image/*,.pdf" onchange="handleKycFileSelect(event)">
+              <button type="button" class="btn btn-outline btn-sm" style="margin-top: 0.75rem;" onclick="document.getElementById('kyc-file-input').click()">
+                <i class="fa-solid fa-folder-open"></i> Choose File
+              </button>
+              <div id="kyc-file-name" style="font-size: 0.8rem; font-weight: 700; color: var(--success); margin-top: 0.5rem;"></div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg">
+            <i class="fa-solid fa-paper-plane"></i> Submit for Administrator Verification
+          </button>
+        </form>
       </div>
     </section>
 
@@ -846,8 +854,8 @@
       <div id="auth-login-view">
         <form onsubmit="handleLoginSubmit(event)">
           <div class="form-group" style="margin-bottom:1rem;">
-            <label class="form-label">Email or Mobile Number <span>*</span></label>
-            <input type="text" id="login-identifier" class="form-control" placeholder="e.g. murali@localjobs.local or +91 98765 43210" required>
+            <label class="form-label">Username or Email <span>*</span></label>
+            <input type="text" id="login-identifier" class="form-control" placeholder="e.g. muralisai or murali@localjobs.local" required>
           </div>
           <div class="form-group" style="margin-bottom:1rem;">
             <label class="form-label">Password <span>*</span></label>
@@ -857,7 +865,7 @@
             <label style="display:flex; align-items:center; gap:0.35rem; color:var(--text-muted); cursor:pointer;">
               <input type="checkbox" checked> Remember me
             </label>
-            <a href="javascript:void(0)" onclick="showToast('Password reset link sent to registered email.', 'info')" style="color:var(--primary); font-weight:600;">Forgot password?</a>
+            <a href="javascript:void(0)" onclick="showToast('Password reset instructions sent to email.', 'info')" style="color:var(--primary); font-weight:600;">Forgot password?</a>
           </div>
           <button type="submit" class="btn btn-primary btn-block btn-lg">
             <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
@@ -872,15 +880,15 @@
           <div style="display:flex; flex-direction:column; gap:0.5rem;">
             <button class="btn btn-outline btn-block" onclick="quickDemoLogin('murali@localjobs.local')" style="justify-content:flex-start;">
               <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=MuraliSai" style="width:24px; height:24px; border-radius:50%; margin-right:6px;" alt="Murali">
-              <strong>Murali Sai</strong> — Task Poster & Worker (₹2,450)
+              <strong>Murali Sai</strong> (@muralisai) — Verified Poster (₹2,450)
             </button>
             <button class="btn btn-outline btn-block" onclick="quickDemoLogin('ravi@localjobs.local')" style="justify-content:flex-start;">
               <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=RaviKumar" style="width:24px; height:24px; border-radius:50%; margin-right:6px;" alt="Ravi">
-              <strong>Ravi Kumar</strong> — Active Worker (₹1,200)
+              <strong>Ravi Kumar</strong> (@ravikumar) — Verified Worker (₹1,200)
             </button>
             <button class="btn btn-outline btn-block" onclick="quickDemoLogin('ananya@localjobs.local')" style="justify-content:flex-start;">
               <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=AnanyaSharma" style="width:24px; height:24px; border-radius:50%; margin-right:6px;" alt="Ananya">
-              <strong>Ananya Sharma</strong> — Poster & Tutor (₹3,100)
+              <strong>Ananya Sharma</strong> (@ananyasharma) — Verified Poster (₹3,100)
             </button>
           </div>
         </div>
@@ -888,33 +896,52 @@
 
       <!-- B. Register Form -->
       <div id="auth-register-view" style="display:none;">
-        <form onsubmit="handleRegisterSubmit(event)">
-          <div class="form-group" style="margin-bottom:0.85rem;">
+        <form id="user-register-form" onsubmit="handleRegisterSubmit(event)">
+          <div class="form-group" style="margin-bottom:0.75rem;">
             <label class="form-label">Full Name <span>*</span></label>
             <input type="text" id="reg-name" class="form-control" placeholder="e.g. Suresh Varma" required>
           </div>
-          <div class="form-group" style="margin-bottom:0.85rem;">
+
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label class="form-label">Unique Username <span>*</span></label>
+            <input type="text" id="reg-username" class="form-control" placeholder="e.g. suresh_varma" oninput="handleUsernameInput(event)" required>
+            <div id="username-feedback" style="font-size:0.75rem; margin-top:3px; font-weight:600;"></div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0.75rem;">
             <label class="form-label">Email Address <span>*</span></label>
             <input type="email" id="reg-email" class="form-control" placeholder="e.g. suresh@localjobs.local" required>
           </div>
-          <div class="form-group" style="margin-bottom:0.85rem;">
-            <label class="form-label">Mobile Number <span>*</span></label>
-            <input type="tel" id="reg-phone" class="form-control" placeholder="e.g. +91 98765 00000" required>
+
+          <div class="form-group" style="margin-bottom:0.75rem;">
+            <label class="form-label">Mobile Number (10 digits) <span>*</span></label>
+            <input type="tel" id="reg-phone" class="form-control" placeholder="e.g. 9876543210" required>
           </div>
-          <div class="form-group" style="margin-bottom:0.85rem;">
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+            <div class="form-group">
+              <label class="form-label">Password <span>*</span></label>
+              <input type="password" id="reg-password" class="form-control" placeholder="Min 6 characters" oninput="checkPasswordStrength(event)" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm Password <span>*</span></label>
+              <input type="password" id="reg-confirm-password" class="form-control" placeholder="Re-enter password" oninput="checkPasswordMatch()" required>
+            </div>
+          </div>
+          <div id="password-match-feedback" style="font-size:0.75rem; margin-bottom:0.75rem; font-weight:600;"></div>
+
+          <div class="form-group" style="margin-bottom:0.75rem;">
             <label class="form-label">Neighborhood / City <span>*</span></label>
             <input type="text" id="reg-location" class="form-control" placeholder="e.g. Lawyerpet, Ongole" required>
           </div>
-          <div class="form-group" style="margin-bottom:0.85rem;">
-            <label class="form-label">Skills (Comma separated)</label>
+
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label">Skills & Interests (Comma separated)</label>
             <input type="text" id="reg-skills" class="form-control" placeholder="e.g. Delivery, Photography, Excel, Tutoring">
           </div>
-          <div class="form-group" style="margin-bottom:1.25rem;">
-            <label class="form-label">Short Bio</label>
-            <input type="text" id="reg-bio" class="form-control" placeholder="e.g. Student looking for local part-time micro-gigs.">
-          </div>
-          <button type="submit" class="btn btn-primary btn-block btn-lg">
-            <i class="fa-solid fa-user-plus"></i> Create Dual Account
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-register-submit">
+            <i class="fa-solid fa-user-plus"></i> Create Dual Account & Verify
           </button>
         </form>
       </div>
@@ -926,7 +953,12 @@
     <div class="modal-card">
       <div class="modal-header">
         <div class="task-category-tag" id="modal-task-category">Restaurants</div>
-        <button class="modal-close-btn" onclick="closeModal('modal-task-details')"><i class="fa-solid fa-xmark"></i></button>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <button class="btn btn-outline btn-sm" style="padding:0.25rem 0.6rem; font-size:0.75rem; color:#ef4444; border-color:#fca5a5;" onclick="openReportModal('TASK', currentOpenedTaskId)" title="Report suspicious task">
+            <i class="fa-solid fa-flag"></i> Report
+          </button>
+          <button class="modal-close-btn" onclick="closeModal('modal-task-details')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
       </div>
 
       <h2 class="modal-title" id="modal-task-title" style="margin-bottom: 0.5rem;">Restaurant Helper</h2>
@@ -956,17 +988,22 @@
       </div>
 
       <!-- Poster Reputation Card -->
-      <div style="border-top:1px solid var(--border-color); padding-top:1.25rem; margin-bottom:1.5rem;">
-        <h4 style="font-size:0.85rem; font-weight:700; margin-bottom:0.75rem; color:var(--secondary);">Posted By:</h4>
-        <div class="poster-mini-info" style="gap:0.75rem;">
-          <img id="modal-poster-avatar" src="" class="profile-avatar-large" style="width:46px; height:46px;" alt="Poster">
-          <div>
-            <div class="poster-mini-name" style="font-size:0.95rem;" id="modal-poster-name">Murali Sai <i class="fa-solid fa-circle-check verified-icon"></i></div>
-            <div style="font-size:0.8rem; color:var(--text-muted);">
-              ★ <strong id="modal-poster-rating" style="color:var(--accent-amber);">4.8</strong> • <span id="modal-poster-tasks">24</span> completed tasks • Verified Poster
+      <div style="border-top:1px solid var(--border-color); padding-top:1.25rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h4 style="font-size:0.85rem; font-weight:700; margin-bottom:0.5rem; color:var(--secondary);">Posted By:</h4>
+          <div class="poster-mini-info" style="gap:0.75rem;">
+            <img id="modal-poster-avatar" src="" class="profile-avatar-large" style="width:44px; height:44px;" alt="Poster">
+            <div>
+              <div class="poster-mini-name" style="font-size:0.95rem;" id="modal-poster-name">Murali Sai <span id="modal-poster-verified-badge" class="task-status-badge status-payment_released" style="font-size:0.65rem; padding:1px 6px; margin-left:4px;"><i class="fa-solid fa-circle-check"></i> Verified User</span></div>
+              <div style="font-size:0.8rem; color:var(--text-muted);">
+                ★ <strong id="modal-poster-rating" style="color:var(--accent-amber);">4.8</strong> • <span id="modal-poster-tasks">24</span> completed tasks
+              </div>
             </div>
           </div>
         </div>
+        <button class="btn btn-outline btn-sm" id="btn-block-poster" style="color:var(--text-muted); font-size:0.75rem;" onclick="handleBlockPosterFromModal()">
+          <i class="fa-solid fa-ban"></i> Block User
+        </button>
       </div>
 
       <!-- Modal Action Buttons -->
@@ -974,6 +1011,70 @@
         <button class="btn btn-outline" onclick="closeModal('modal-task-details')">Close</button>
         <button class="btn btn-primary" id="btn-accept-task" onclick="handleAcceptTaskFromModal()"><i class="fa-solid fa-handshake"></i> Accept Task (₹<span id="btn-accept-reward">400</span>)</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Verification Requirement Interceptor Modal -->
+  <div id="modal-verification-required" class="modal-overlay">
+    <div class="modal-card" style="text-align:center; max-width:440px;">
+      <div style="width:64px; height:64px; border-radius:50%; background:#fee2e2; color:#ef4444; font-size:1.8rem; display:flex; align-items:center; justify-content:center; margin:0 auto 1.25rem;">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <h2 style="font-size:1.35rem; font-weight:800; color:var(--secondary); margin-bottom:0.5rem;">Identity Verification Required</h2>
+      <p style="font-size:0.92rem; color:var(--text-muted); line-height:1.5; margin-bottom:1.5rem;">
+        <strong>"Please complete identity verification to use this feature."</strong><br>
+        To ensure platform trust and safety between job creators and job seekers, posting and accepting micro-tasks requires a quick identity verification.
+      </p>
+      <div style="display:flex; flex-direction:column; gap:0.6rem;">
+        <button class="btn btn-primary btn-block btn-lg" onclick="closeModal('modal-verification-required'); navigateTo('verify');">
+          <i class="fa-solid fa-id-card"></i> Complete Identity Verification Now
+        </button>
+        <button class="btn btn-outline btn-block" onclick="closeModal('modal-verification-required')">
+          Browse Platform First
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incident Reporting Modal -->
+  <div id="modal-report" class="modal-overlay">
+    <div class="modal-card" style="max-width:480px;">
+      <div class="modal-header">
+        <h2 class="modal-title" style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> File Incident Report</h2>
+        <button class="modal-close-btn" onclick="closeModal('modal-report')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1rem;" id="report-target-desc">
+        Help us maintain a safe community. Reports are reviewed promptly by administrators.
+      </p>
+      <form id="report-submission-form" onsubmit="handleReportSubmit(event)">
+        <input type="hidden" id="report-type-input" value="USER_REPORT">
+        <input type="hidden" id="report-target-id-input" value="">
+
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label">Reason for Report <span>*</span></label>
+          <select id="report-reason-select" class="form-control" required>
+            <option value="Fraud">Fraud or Scam</option>
+            <option value="Fake identity">Fake identity or Impersonation</option>
+            <option value="Harassment">Harassment or Abuse</option>
+            <option value="Suspicious behavior">Suspicious behavior</option>
+            <option value="Payment problems">Payment problems</option>
+            <option value="Misleading information">Misleading information</option>
+            <option value="Other">Other Policy Violation</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-label">Detailed Explanation <span>*</span></label>
+          <textarea id="report-description-input" class="form-control" rows="3" placeholder="Provide specific details about what happened..." required></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-report')">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background:#ef4444; border-color:#dc2626;">
+            <i class="fa-solid fa-paper-plane"></i> Submit Incident Report
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

@@ -37,10 +37,13 @@ public class UserService {
             return existing.get();
         }
 
+        String username = request.getName().toLowerCase().replaceAll("[^a-z0-9]", "_") + "_" + System.currentTimeMillis() % 10000;
         User user = new User(
                 request.getName(),
+                username,
                 request.getEmail(),
                 request.getPhone(),
+                null,
                 request.getLocation() != null ? request.getLocation() : "Ongole",
                 request.getLatitude() != null ? request.getLatitude() : 15.5057,
                 request.getLongitude() != null ? request.getLongitude() : 80.0499,
@@ -52,6 +55,8 @@ public class UserService {
                 0.0,
                 "https://api.dicebear.com/7.x/avataaars/svg?seed=" + request.getName().replaceAll("\\s+", ""),
                 request.getBio() != null ? request.getBio() : "Looking for micro-tasks and local work nearby.",
+                com.instantwork.model.Role.USER,
+                com.instantwork.model.VerificationStatus.VERIFIED,
                 true
         );
         return userRepository.save(user);

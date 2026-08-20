@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocalJobs — Administration & Security Portal</title>
+  <meta name="description" content="LocalJobs Secure Platform Administration Portal. Manage identity verifications, user moderation, reports, and audit logs.">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="background-color: #f1f5f9;">
+
+  <!-- ======================================================================
+       1. ADMIN AUTHENTICATION SCREEN (UNAUTHENTICATED)
+       ====================================================================== -->
+  <div id="admin-login-view" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
+    <div class="form-card" style="max-width: 440px; width: 100%; border-top: 4px solid #7e22ce;">
+      <div style="text-align: center; margin-bottom: 1.75rem;">
+        <div class="brand-icon" style="width: 52px; height: 52px; font-size: 1.6rem; margin: 0 auto 0.75rem; background: linear-gradient(135deg, #7e22ce, #4f46e5);">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--secondary); margin-bottom: 0.25rem;">Administrator Portal</h1>
+        <p style="font-size: 0.84rem; color: var(--text-muted);">Restricted access for authorized platform moderators only</p>
+      </div>
+
+      <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Admin Username <span>*</span></label>
+          <input type="text" id="admin-username-input" class="form-control" placeholder="Enter admin username" value="admin" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Admin Password <span>*</span></label>
+          <input type="password" id="admin-password-input" class="form-control" placeholder="Enter admin password" value="Admin@123" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="background: linear-gradient(135deg, #7e22ce, #4f46e5);">
+          <i class="fa-solid fa-lock"></i> Authenticate & Enter Portal
+        </button>
+      </form>
+
+      <div style="margin-top: 1.5rem; text-align: center; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 1rem;">
+        <a href="index.html" style="color: var(--primary); font-weight: 600;"><i class="fa-solid fa-arrow-left"></i> Return to User Application</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       2. ADMIN DASHBOARD & MANAGEMENT (AUTHENTICATED)
+       ====================================================================== -->
+  <div id="admin-app-view" style="display: none; flex-direction: column; min-height: 100vh;">
+    
+    <!-- Admin Top Navbar -->
+    <header class="header" style="background: #0f172a; color: white; border-bottom: 1px solid #1e293b;">
+      <div class="header-content">
+        <div class="brand-logo" onclick="switchAdminTab('overview')">
+          <div class="brand-icon" style="background: linear-gradient(135deg, #7e22ce, #6366f1);">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <div class="brand-title" style="color: white;">Local<span>Jobs</span> <span style="font-size: 0.75rem; background: #7e22ce; color: white; padding: 2px 8px; border-radius: 999px; vertical-align: middle; margin-left: 4px;">ADMIN</span></div>
+            <div class="brand-tagline" style="color: #94a3b8;">Security & Moderation Portal</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div style="font-size: 0.84rem; color: #cbd5e1;">
+            <i class="fa-solid fa-user-shield text-primary"></i> Logged in as: <strong id="admin-user-display" style="color: white;">@admin</strong>
+          </div>
+          <a href="/h2-console" target="_blank" class="btn btn-outline-white btn-sm" title="H2 SQL Database Console">
+            <i class="fa-solid fa-database"></i> SQL Console
+          </a>
+          <button class="btn btn-outline-white btn-sm" onclick="handleAdminLogout()">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Admin Navigation Tabs -->
+    <div style="background: white; border-bottom: 1px solid var(--border-color); padding: 0 1.5rem;">
+      <div style="max-width: 1240px; margin: 0 auto; display: flex; gap: 0.5rem; overflow-x: auto;">
+        <button class="tab-btn active" id="tab-admin-overview" onclick="switchAdminTab('overview')">
+          <i class="fa-solid fa-chart-line"></i> Overview & Metrics
+        </button>
+        <button class="tab-btn" id="tab-admin-verifications" onclick="switchAdminTab('verifications')">
+          <i class="fa-solid fa-id-card-clip"></i> Verification Requests <span class="tab-count" id="admin-pending-verif-badge" style="background:#fee2e2; color:#ef4444;">0</span>
+        </button>
+        <button class="tab-btn" id="tab-admin-users" onclick="switchAdminTab('users')">
+          <i class="fa-solid fa-users-gear"></i> User Management
+        </button>
+        <button class="tab-btn" id="tab-admin-reports" onclick="switchAdminTab('reports')">
+          <i class="fa-solid fa-triangle-exclamation"></i> Reports & Complaints <span class="tab-count" id="admin-pending-reports-badge" style="background:#fef3c7; color:#b45309;">0</span>
+        </button>
+        <button class="tab-btn" id="tab-admin-tasks" onclick="switchAdminTab('tasks')">
+          <i class="fa-solid fa-list-check"></i> Task Moderation
+        </button>
+        <button class="tab-btn" id="tab-admin-audit" onclick="switchAdminTab('audit')">
+          <i class="fa-solid fa-shield-cat"></i> Security Audit Logs
+        </button>
+      </div>
+    </div>
+
+    <!-- Admin Content Container -->
+    <main class="main-container" style="padding-top: 1.75rem;">
+
+      <!-- ================================================================
+           TAB 1: OVERVIEW & PLATFORM METRICS
+           ================================================================ -->
+      <section id="admin-view-overview" class="admin-tab-view">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-chart-pie text-primary"></i> Platform Health & Governance</h2>
+            <p class="section-subtitle">Real-time platform activity, trust metrics, and security monitors</p>
+          </div>
+        </div>
+
+        <div class="wallet-stats-grid">
+          <div class="stat-card" style="border-left: 4px solid #7e22ce;">
+            <div class="stat-icon" style="background: #f3e8ff; color: #7e22ce;">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-title">Total Users</span>
+              <span class="stat-value" id="stat-total-users">0</span>
+              <span class="stat-subtitle">Registered dual-accounts</span>
+            </div>
+          </div>
+
+          <div class="stat-card" style="border-left: 4px solid var(--primary);">
+            <div class="stat-icon" style="background: var(--primary-light); color: var(--primary);">
+              <i class="fa-solid fa-briefcase"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-title">Total Tasks</span>
+              <span class="stat-value" id="stat-total-tasks">0</span>
+              <span class="stat-subtitle"><span id="stat-open-tasks">0</span> Open • <span id="stat-active-tasks">0</span> Active</span>
+            </div>
+          </div>
+
+          <div class="stat-card" style="border-left: 4px solid #ef4444;">
+            <div class="stat-icon" style="background: #fee2e2; color: #ef4444;">
+              <i class="fa-solid fa-id-card"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-title">Pending KYC</span>
+              <span class="stat-value" id="stat-pending-kyc">0</span>
+              <span class="stat-subtitle">Requires administrator review</span>
+            </div>
+          </div>
+
+          <div class="stat-card" style="border-left: 4px solid var(--accent-amber);">
+            <div class="stat-icon" style="background: var(--accent-amber-light); color: var(--accent-amber);">
+              <i class="fa-solid fa-flag"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-title">Pending Reports</span>
+              <span class="stat-value" id="stat-pending-reports">0</span>
+              <span class="stat-subtitle">Unresolved incident tickets</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+          <div class="transactions-card">
+            <h3 class="section-title" style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fa-solid fa-bolt text-primary"></i> Quick Admin Actions</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+              <button class="btn btn-outline btn-block" onclick="switchAdminTab('verifications')" style="justify-content: flex-start;">
+                <i class="fa-solid fa-id-card-clip text-primary"></i> Review Pending Verification Requests
+              </button>
+              <button class="btn btn-outline btn-block" onclick="switchAdminTab('reports')" style="justify-content: flex-start;">
+                <i class="fa-solid fa-triangle-exclamation" style="color:#b45309;"></i> Moderate Flagged Reports
+              </button>
+              <button class="btn btn-outline btn-block" onclick="switchAdminTab('audit')" style="justify-content: flex-start;">
+                <i class="fa-solid fa-shield-cat text-success"></i> View Platform Security Audit Trail
+              </button>
+            </div>
+          </div>
+
+          <div class="transactions-card">
+            <h3 class="section-title" style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fa-solid fa-shield-halved text-success"></i> System Security Status</h3>
+            <ul class="dual-list">
+              <li><i class="fa-solid fa-circle-check text-success"></i> BCrypt Password Hash Encryption: <strong>ACTIVE</strong></li>
+              <li><i class="fa-solid fa-circle-check text-success"></i> Aadhaar/PAN Masking Privacy Filter: <strong>ENFORCED</strong></li>
+              <li><i class="fa-solid fa-circle-check text-success"></i> Role-Based API Endpoint Protection: <strong>ACTIVE</strong></li>
+              <li><i class="fa-solid fa-circle-check text-success"></i> Unverified User Job Activity Gating: <strong>ACTIVE</strong></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 2: VERIFICATION REQUESTS (MOCK KYC)
+           ================================================================ -->
+      <section id="admin-view-verifications" class="admin-tab-view" style="display: none;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-id-card-clip text-primary"></i> Identity Verification Requests</h2>
+            <p class="section-subtitle">Review submitted mock KYC documents and assign <strong>✓ Verified User</strong> badges</p>
+          </div>
+        </div>
+
+        <div class="transactions-card">
+          <div style="overflow-x: auto;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                  <th style="padding: 0.75rem 0.5rem;">User</th>
+                  <th style="padding: 0.75rem 0.5rem;">Document Type</th>
+                  <th style="padding: 0.75rem 0.5rem;">Masked ID</th>
+                  <th style="padding: 0.75rem 0.5rem;">Name on Document</th>
+                  <th style="padding: 0.75rem 0.5rem;">Submitted At</th>
+                  <th style="padding: 0.75rem 0.5rem;">Status</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: right;">Review Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-verifications-table-body">
+                <!-- Dynamic Pending Verifications -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 3: USER MANAGEMENT
+           ================================================================ -->
+      <section id="admin-view-users" class="admin-tab-view" style="display: none;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-users-gear text-primary"></i> User Accounts & Status Management</h2>
+            <p class="section-subtitle">Inspect user accounts, manage account statuses (Active, Suspended), and review trust</p>
+          </div>
+        </div>
+
+        <div class="transactions-card">
+          <div style="overflow-x: auto;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                  <th style="padding: 0.75rem 0.5rem;">User</th>
+                  <th style="padding: 0.75rem 0.5rem;">Username</th>
+                  <th style="padding: 0.75rem 0.5rem;">Email & Phone</th>
+                  <th style="padding: 0.75rem 0.5rem;">Verification</th>
+                  <th style="padding: 0.75rem 0.5rem;">Account Status</th>
+                  <th style="padding: 0.75rem 0.5rem;">Balance</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: right;">Status Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-full-table-body">
+                <!-- Dynamic Users List -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 4: REPORTS & COMPLAINTS
+           ================================================================ -->
+      <section id="admin-view-reports" class="admin-tab-view" style="display: none;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-triangle-exclamation text-primary"></i> Incident Reports & Moderation</h2>
+            <p class="section-subtitle">Investigate user reports regarding fraud, suspicious behavior, or spam tasks</p>
+          </div>
+        </div>
+
+        <div class="transactions-card">
+          <div style="overflow-x: auto;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                  <th style="padding: 0.75rem 0.5rem;">Report ID</th>
+                  <th style="padding: 0.75rem 0.5rem;">Type</th>
+                  <th style="padding: 0.75rem 0.5rem;">Reporter</th>
+                  <th style="padding: 0.75rem 0.5rem;">Target (User / Task)</th>
+                  <th style="padding: 0.75rem 0.5rem;">Reason & Details</th>
+                  <th style="padding: 0.75rem 0.5rem;">Status</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-reports-table-body">
+                <!-- Dynamic Reports List -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 5: TASK MODERATION
+           ================================================================ -->
+      <section id="admin-view-tasks" class="admin-tab-view" style="display: none;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-list-check text-primary"></i> Platform Task Moderation</h2>
+            <p class="section-subtitle">Review active and completed tasks across all categories; delete spam postings</p>
+          </div>
+        </div>
+
+        <div class="transactions-card">
+          <div style="overflow-x: auto;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                  <th style="padding: 0.75rem 0.5rem;">Task ID</th>
+                  <th style="padding: 0.75rem 0.5rem;">Title</th>
+                  <th style="padding: 0.75rem 0.5rem;">Category</th>
+                  <th style="padding: 0.75rem 0.5rem;">Reward</th>
+                  <th style="padding: 0.75rem 0.5rem;">Poster</th>
+                  <th style="padding: 0.75rem 0.5rem;">Status</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-tasks-mod-table-body">
+                <!-- Dynamic Tasks Moderation List -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 6: SECURITY AUDIT LOGS
+           ================================================================ -->
+      <section id="admin-view-audit" class="admin-tab-view" style="display: none;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-shield-cat text-primary"></i> Platform Security Audit Logs</h2>
+            <p class="section-subtitle">Immutable trail of administrative decisions, account suspensions, and verification actions</p>
+          </div>
+        </div>
+
+        <div class="transactions-card">
+          <div style="overflow-x: auto;">
+            <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                  <th style="padding: 0.75rem 0.5rem;">Timestamp</th>
+                  <th style="padding: 0.75rem 0.5rem;">Admin</th>
+                  <th style="padding: 0.75rem 0.5rem;">Action</th>
+                  <th style="padding: 0.75rem 0.5rem;">Target</th>
+                  <th style="padding: 0.75rem 0.5rem;">Reason / Notes</th>
+                </tr>
+              </thead>
+              <tbody id="admin-audit-table-body">
+                <!-- Dynamic Audit Logs -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

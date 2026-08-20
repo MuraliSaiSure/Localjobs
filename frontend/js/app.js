@@ -135,10 +135,33 @@ function onStateChange(event, payload) {
   }
 }
 
+// Helper: Is user fully verified
+function isUserVerified(user) {
+  if (!user) return false;
+  return user.verified === true || user.verificationStatus === 'VERIFIED';
+}
+
 // ============================================================================
 // NAVIGATION & SCREEN SWITCHER
 // ============================================================================
 function navigateTo(screenName) {
+  // If requesting admin screen, route directly to dedicated admin portal
+  if (screenName === 'admin') {
+    window.location.href = 'admin.html';
+    return;
+  }
+
+  // Intercept unverified user trying to post tasks
+  if (screenName === 'post' && !isUserVerified(State.currentUser)) {
+    if (!State.currentUser) {
+      openAuthModal('login');
+      showToast('Please sign in first.', 'info');
+    } else {
+      openModal('modal-verification-required');
+    }
+    return;
+  }
+
   // Update view containers
   document.querySelectorAll('.screen-view').forEach(view => {
     view.classList.remove('active');
@@ -186,8 +209,8 @@ function refreshActiveScreenData() {
     case 'profile':
       loadProfileData();
       break;
-    case 'admin':
-      loadAdminData();
+    case 'verify':
+      loadVerificationScreenData();
       break;
   }
 }
@@ -203,11 +226,20 @@ function renderHeaderProfile() {
   const headerName = document.getElementById('header-user-name');
   const heroName = document.getElementById('hero-user-name');
   const heroLocation = document.getElementById('hero-location-text');
+  const heroVerified = document.getElementById('hero-verified-badge');
+  const heroVerifyBtn = document.getElementById('hero-verify-btn');
+  const navVerifyBadge = document.getElementById('nav-verify-badge');
+
+  const verified = isUserVerified(user);
 
   if (headerAvatar) headerAvatar.src = user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`;
   if (headerName) headerName.textContent = user.name;
   if (heroName) heroName.textContent = user.name.split(' ')[0];
   if (heroLocation) heroLocation.textContent = user.location || 'Ongole';
+
+  if (heroVerified) heroVerified.style.display = verified ? 'inline-block' : 'none';
+  if (heroVerifyBtn) heroVerifyBtn.style.display = verified ? 'none' : 'inline-flex';
+  if (navVerifyBadge) navVerifyBadge.style.display = verified ? 'none' : 'inline-block';
 }
 
 function updateNotificationBadge(unreadCount) {
@@ -385,7 +417,13 @@ function resetFilters() {
 async function handlePostTaskSubmit(e) {
   e.preventDefault();
   if (!State.currentUser) {
-    showToast('Please select a user persona first', 'error');
+    openAuthModal('login');
+    showToast('Please sign in to post tasks', 'info');
+    return;
+  }
+
+  if (!isUserVerified(State.currentUser)) {
+    openModal('modal-verification-required');
     return;
   }
 
@@ -430,7 +468,7 @@ async function handlePostTaskSubmit(e) {
       showToast(res.error || 'Failed to post task', 'error');
     }
   } catch (error) {
-    showToast('Error creating task', 'error');
+    showToast(error.message || 'Error creating task', 'error');
   }
 }
 
@@ -644,10 +682,16 @@ function renderTaskCard(task, options = {}) {
 // ============================================================================
 async function handleDirectAccept(taskId, reward) {
   if (!State.currentUser) {
-    showToast('Please select a user persona first', 'error');
+    openAuthModal('login');
+    showToast('Please sign in or create an account to accept tasks', 'info');
     return;
   }
   
+  if (!isUserVerified(State.currentUser)) {
+    openModal('modal-verification-required');
+    return;
+  }
+
   if (confirm(`Do you want to accept this task and commit to earning ₹${reward}?`)) {
     try {
       const res = await API.acceptTask(taskId, State.currentUser.id);
@@ -660,7 +704,7 @@ async function handleDirectAccept(taskId, reward) {
         showToast(res.error || 'Failed to accept task', 'error');
       }
     } catch (e) {
-      showToast('Error accepting task', 'error');
+      showToast(e.message || 'Error accepting task', 'error');
     }
   }
 }
@@ -851,11 +895,15 @@ async function openTaskDetails(taskId) {
     const acceptReward = document.getElementById('btn-accept-reward');
     if (acceptReward) acceptReward.textContent = task.reward;
 
-    // Hide accept button if already poster or not open
-    if (State.currentUser && (task.posterId === State.currentUser.id || task.status !== 'OPEN')) {
-      if (acceptBtn) acceptBtn.style.display = 'none';
-    } else {
-      if (acceptBtn) acceptBtn.style.display = 'inline-flex';
+    currentOpenedTaskId = taskId;
+    currentOpenedPosterId = task.posterId;
+    const blockBtn = document.getElementById('btn-block-poster');
+    if (blockBtn) {
+      if (State.currentUser && State.currentUser.id === task.posterId) {
+        blockBtn.style.display = 'none';
+      } else {
+        blockBtn.style.display = 'inline-flex';
+      }
     }
 
     openModal('modal-task-details');
@@ -1099,77 +1147,351 @@ async function loadAdminData() {
 
     // Render Users Table
     const usersBody = document.getElementById('admin-users-table-body');
-    if (usersBody) {
-      usersBody.innerHTML = (users || []).map(u => `
-        <tr style="border-bottom: 1px solid var(--border-subtle);">
-          <td style="padding:0.75rem 0.5rem; display:flex; align-items:center; gap:0.5rem;">
-            <img src="${u.avatarUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + u.name}" style="width:28px; height:28px; border-radius:50%;" alt="${u.name}">
-            <strong>${u.name}</strong>
-          </td>
-          <td style="padding:0.75rem 0.5rem; color:var(--text-muted);">${u.email}<br><span style="font-size:0.75rem;">${u.phone || 'N/A'}</span></td>
-          <td style="padding:0.75rem 0.5rem;">${u.location || 'Ongole'}</td>
-          <td style="padding:0.75rem 0.5rem; color:var(--accent);">★ ${u.rating || 5.0}</td>
-          <td style="padding:0.75rem 0.5rem;">${u.completedTasks || 0}</td>
-          <td style="padding:0.75rem 0.5rem; font-weight:700; color:var(--primary);">₹${u.walletBalance || 0}</td>
-          <td style="padding:0.75rem 0.5rem;">
-            <button class="btn btn-sm ${u.verified ? 'btn-outline' : 'btn-primary'}" style="padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="handleAdminToggleVerify(${u.id})">
-              ${u.verified ? '<i class="fa-solid fa-circle-check text-primary"></i> Verified' : '<i class="fa-solid fa-shield"></i> Verify User'}
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
+// ============================================================================
+// 7. IDENTITY VERIFICATION SCREEN (MOCK KYC)
+// ============================================================================
+let selectedKycDocType = 'AADHAAR';
+let currentOpenedTaskId = null;
+let currentOpenedPosterId = null;
 
-    // Render Tasks Table
-    const tasksBody = document.getElementById('admin-tasks-table-body');
-    if (tasksBody) {
-      tasksBody.innerHTML = (tasks || []).map(t => `
-        <tr style="border-bottom: 1px solid var(--border-subtle);">
-          <td style="padding:0.75rem 0.5rem; font-weight:700; color:var(--text-muted);">#${t.id}</td>
-          <td style="padding:0.75rem 0.5rem; font-weight:600;">${t.title}</td>
-          <td style="padding:0.75rem 0.5rem;"><span class="task-category-tag">${t.category}</span></td>
-          <td style="padding:0.75rem 0.5rem;">${t.posterName}</td>
-          <td style="padding:0.75rem 0.5rem; font-weight:700; color:var(--primary);">₹${t.reward}</td>
-          <td style="padding:0.75rem 0.5rem;"><span class="task-status-badge status-${t.status.toLowerCase()}">${t.status}</span></td>
-          <td style="padding:0.75rem 0.5rem; text-align:center;">
-            <button class="btn btn-outline btn-sm" style="color:var(--danger); border-color:#fca5a5; padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="handleAdminDeleteTask(${t.id})">
-              <i class="fa-solid fa-trash"></i> Delete
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
+function selectDocType(type) {
+  selectedKycDocType = type;
+  const choiceAadhaar = document.getElementById('doc-choice-aadhaar');
+  const choicePan = document.getElementById('doc-choice-pan');
+  const numLabel = document.getElementById('kyc-number-label');
+  const docInput = document.getElementById('kyc-doc-number');
+  const maskPreview = document.getElementById('kyc-mask-preview');
 
-  } catch (error) {
-    showToast('Failed to load admin stats', 'error');
+  if (type === 'AADHAAR') {
+    if (choiceAadhaar) { choiceAadhaar.style.borderColor = 'var(--primary)'; choiceAadhaar.style.background = '#f5f3ff'; }
+    if (choicePan) { choicePan.style.borderColor = 'var(--border-color)'; choicePan.style.background = 'white'; }
+    if (numLabel) numLabel.innerHTML = 'Aadhaar Card Number <span>*</span>';
+    if (docInput) { docInput.placeholder = 'e.g. 5432 8765 1234'; docInput.maxLength = 16; }
+    if (maskPreview) maskPreview.textContent = 'XXXX-XXXX-1234';
+  } else {
+    if (choiceAadhaar) { choiceAadhaar.style.borderColor = 'var(--border-color)'; choiceAadhaar.style.background = 'white'; }
+    if (choicePan) { choicePan.style.borderColor = 'var(--primary)'; choicePan.style.background = '#f5f3ff'; }
+    if (numLabel) numLabel.innerHTML = 'PAN Card Number <span>*</span>';
+    if (docInput) { docInput.placeholder = 'e.g. ABCDE1234F'; docInput.maxLength = 10; }
+    if (maskPreview) maskPreview.textContent = 'XXXXX1234X';
   }
 }
 
-async function handleAdminToggleVerify(userId) {
+function handleKycFileSelect(event) {
+  const file = event.target.files[0];
+  const nameDisplay = document.getElementById('kyc-file-name');
+  if (file && nameDisplay) {
+    nameDisplay.textContent = `✓ Selected: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+  }
+}
+
+async function loadVerificationScreenData() {
+  if (!State.currentUser) {
+    openAuthModal('login');
+    showToast('Please sign in to view identity verification', 'info');
+    return;
+  }
+
+  const user = State.currentUser;
+  const statusBanner = document.getElementById('verify-status-banner');
+  const statusIconBox = document.getElementById('verify-status-icon-box');
+  const statusTitle = document.getElementById('verify-status-title');
+  const statusBadge = document.getElementById('verify-status-badge');
+  const summaryBox = document.getElementById('verify-details-summary');
+  const summaryDoc = document.getElementById('verify-summary-doc');
+  const summaryMasked = document.getElementById('verify-summary-masked');
+  const summaryName = document.getElementById('verify-summary-name');
+  const remarksBox = document.getElementById('verify-remarks-box');
+  const formContainer = document.getElementById('verify-form-container');
+
+  const status = user.verificationStatus || (user.verified ? 'VERIFIED' : 'NOT_VERIFIED');
+
+  if (summaryDoc) summaryDoc.textContent = user.verificationDocType || 'AADHAAR';
+  if (summaryMasked) summaryMasked.textContent = user.maskedDocNumber || 'XXXX-XXXX-XXXX';
+  if (summaryName) summaryName.textContent = user.nameOnDoc || user.name;
+
+  if (status === 'VERIFIED') {
+    if (statusIconBox) { statusIconBox.style.background = '#d1fae5'; statusIconBox.style.color = '#059669'; statusIconBox.innerHTML = '<i class="fa-solid fa-circle-check"></i>'; }
+    if (statusTitle) statusTitle.textContent = 'Identity Verified (✓ Verified User)';
+    if (statusBadge) { statusBadge.className = 'task-status-badge status-payment_released'; statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> VERIFIED'; }
+    if (summaryBox) summaryBox.style.display = 'block';
+    if (remarksBox) remarksBox.innerHTML = `<span style="color:#059669; font-weight:700;"><i class="fa-solid fa-shield-check"></i> You have full access to post tasks, accept tasks, and receive wallet payouts.</span>`;
+    if (formContainer) formContainer.style.display = 'none';
+  } else if (status === 'VERIFICATION_PENDING') {
+    if (statusIconBox) { statusIconBox.style.background = '#fef3c7'; statusIconBox.style.color = '#b45309'; statusIconBox.innerHTML = '<i class="fa-solid fa-hourglass-half"></i>'; }
+    if (statusTitle) statusTitle.textContent = 'Verification Under Review';
+    if (statusBadge) { statusBadge.className = 'task-status-badge status-in_progress'; statusBadge.style.background = '#fef3c7'; statusBadge.style.color = '#b45309'; statusBadge.textContent = 'PENDING REVIEW'; }
+    if (summaryBox) summaryBox.style.display = 'block';
+    if (remarksBox) remarksBox.innerHTML = `<span style="color:#b45309;"><i class="fa-solid fa-clock"></i> Submitted ${user.verificationSubmittedAt ? formatDate(user.verificationSubmittedAt) : 'recently'}. Administrator review is in progress.</span>`;
+    if (formContainer) formContainer.style.display = 'none';
+  } else if (status === 'REJECTED') {
+    if (statusIconBox) { statusIconBox.style.background = '#fee2e2'; statusIconBox.style.color = '#b91c1c'; statusIconBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>'; }
+    if (statusTitle) statusTitle.textContent = 'Verification Rejected';
+    if (statusBadge) { statusBadge.className = 'task-status-badge status-in_progress'; statusBadge.style.background = '#fee2e2'; statusBadge.style.color = '#b91c1c'; statusBadge.textContent = 'REJECTED'; }
+    if (summaryBox) summaryBox.style.display = 'block';
+    if (remarksBox) remarksBox.innerHTML = `<span style="color:#b91c1c; font-weight:700;"><i class="fa-solid fa-circle-exclamation"></i> Reason: ${user.verificationRemarks || 'Document details did not match.'} Please resubmit below.</span>`;
+    if (formContainer) formContainer.style.display = 'block';
+  } else {
+    if (statusIconBox) { statusIconBox.style.background = '#fee2e2'; statusIconBox.style.color = '#ef4444'; statusIconBox.innerHTML = '<i class="fa-solid fa-id-card"></i>'; }
+    if (statusTitle) statusTitle.textContent = 'Identity Verification Required';
+    if (statusBadge) { statusBadge.className = 'task-status-badge status-in_progress'; statusBadge.style.background = '#fee2e2'; statusBadge.style.color = '#b91c1c'; statusBadge.textContent = 'NOT VERIFIED'; }
+    if (summaryBox) summaryBox.style.display = 'none';
+    if (formContainer) formContainer.style.display = 'block';
+  }
+}
+
+async function handleVerificationSubmit(event) {
+  event.preventDefault();
+  if (!State.currentUser) return;
+
+  const nameOnDoc = document.getElementById('kyc-name-on-doc').value.trim();
+  const docNumber = document.getElementById('kyc-doc-number').value.trim();
+
+  if (!nameOnDoc || !docNumber) {
+    showToast('Please fill in all document verification fields.', 'error');
+    return;
+  }
+
   try {
-    await API.toggleUserVerify(userId);
-    showToast('User verification status updated', 'success');
-    loadAdminData();
-  } catch (e) {
-    showToast('Error updating verification', 'error');
+    const res = await API.submitVerification({
+      userId: State.currentUser.id,
+      docType: selectedKycDocType,
+      docNumber,
+      nameOnDoc
+    });
+
+    showToast('Identity verification submitted! Review is pending.', 'success');
+    State.currentUser.verificationStatus = 'VERIFICATION_PENDING';
+    State.currentUser.verificationDocType = selectedKycDocType;
+    State.currentUser.maskedDocNumber = res.maskedDocNumber;
+    State.currentUser.nameOnDoc = nameOnDoc;
+    loadVerificationScreenData();
+    renderHeaderProfile();
+  } catch (error) {
+    showToast(error.message || 'Failed to submit verification.', 'error');
   }
 }
 
-async function handleAdminDeleteTask(taskId) {
-  if (confirm(`Are you sure you want to moderate and delete Task #${taskId}?`)) {
+// ============================================================================
+// 8. REGISTRATION VALIDATION & AUTHENTICATION
+// ============================================================================
+let usernameCheckTimeout = null;
+
+function handleUsernameInput(event) {
+  const username = event.target.value.trim().toLowerCase();
+  const feedback = document.getElementById('username-feedback');
+  if (!feedback) return;
+
+  clearTimeout(usernameCheckTimeout);
+
+  if (username.length < 3) {
+    feedback.textContent = 'Username must be at least 3 characters.';
+    feedback.style.color = 'var(--text-muted)';
+    return;
+  }
+
+  usernameCheckTimeout = setTimeout(async () => {
     try {
-      await API.deleteAdminTask(taskId);
-      showToast(`Task #${taskId} removed by Admin`, 'info');
-      loadAdminData();
+      const res = await API.checkUsername(username);
+      if (res.available) {
+        feedback.innerHTML = `<i class="fa-solid fa-circle-check text-success"></i> <span style="color:#059669;">Username @${username} is available</span>`;
+      } else {
+        feedback.innerHTML = `<i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i> <span style="color:#ef4444;">Username already exists. Please choose another username.</span>`;
+      }
     } catch (e) {
-      showToast('Error deleting task', 'error');
+      feedback.textContent = '';
     }
+  }, 350);
+}
+
+function checkPasswordStrength(event) {
+  const pass = event.target.value;
+  const matchFeedback = document.getElementById('password-match-feedback');
+  if (!matchFeedback) return;
+
+  if (pass.length < 6) {
+    matchFeedback.textContent = 'Password must be at least 6 characters.';
+    matchFeedback.style.color = '#ef4444';
+  } else {
+    matchFeedback.textContent = 'Password strength: Good ✓';
+    matchFeedback.style.color = '#059669';
+  }
+  checkPasswordMatch();
+}
+
+function checkPasswordMatch() {
+  const pass = document.getElementById('reg-password')?.value;
+  const confirm = document.getElementById('reg-confirm-password')?.value;
+  const feedback = document.getElementById('password-match-feedback');
+  if (!feedback || !confirm) return;
+
+  if (pass !== confirm) {
+    feedback.textContent = 'Passwords do not match.';
+    feedback.style.color = '#ef4444';
+  } else {
+    feedback.textContent = 'Passwords match ✓';
+    feedback.style.color = '#059669';
   }
 }
 
+async function handleRegisterSubmit(event) {
+  event.preventDefault();
+  const fullName = document.getElementById('reg-name').value.trim();
+  const username = document.getElementById('reg-username').value.trim().toLowerCase();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirmPassword = document.getElementById('reg-confirm-password').value;
+  const location = document.getElementById('reg-location').value.trim();
+  const skillsInput = document.getElementById('reg-skills').value.trim();
+
+  if (password !== confirmPassword) {
+    showToast('Passwords do not match. Please confirm your password.', 'error');
+    return;
+  }
+
+  const skills = skillsInput ? skillsInput.split(',').map(s => s.trim()).filter(Boolean) : ['General Work'];
+
+  const payload = {
+    fullName,
+    username,
+    email,
+    phone,
+    password,
+    confirmPassword,
+    location,
+    latitude: 15.5057 + (Math.random() - 0.5) * 0.02,
+    longitude: 80.0499 + (Math.random() - 0.5) * 0.02,
+    skills,
+    bio: 'New verified member on LocalJobs ready for local micro-tasks.'
+  };
+
+  try {
+    const user = await API.signupUser(payload);
+    if (user && user.id) {
+      const refreshedUsers = await API.getUsers();
+      State.allUsers = refreshedUsers || [];
+      await State.setCurrentUser(user);
+      closeModal('modal-auth');
+      showToast(`Account @${username} created! Please complete identity verification. 🎉`, 'success');
+      navigateTo('verify');
+    }
+  } catch (error) {
+    showToast(error.message || 'Registration failed.', 'error');
+  }
+}
+
+async function handleLoginSubmit(event) {
+  event.preventDefault();
+  const identifier = document.getElementById('login-identifier').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  try {
+    const user = await API.loginUser(identifier, password);
+    if (user && user.id) {
+      await State.setCurrentUser(user);
+      closeModal('modal-auth');
+      showToast(`Welcome back, ${user.name}! 👋`, 'success');
+      navigateTo('home');
+    }
+  } catch (error) {
+    showToast(error.message || 'Login failed. Check credentials.', 'error');
+  }
+}
+
+async function quickDemoLogin(email) {
+  try {
+    let user = State.allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (!user) {
+      user = await API.loginUser(email, 'password123');
+    }
+    if (user) {
+      await State.setCurrentUser(user);
+      closeModal('modal-auth');
+      showToast(`Logged in as ${user.name} ⚡`, 'success');
+      navigateTo('home');
+    }
+  } catch (error) {
+    showToast('Failed to log in with demo persona', 'error');
+  }
+}
+
+function handleLogout() {
+  State.logout();
+  showToast('You have been signed out.', 'info');
+  navigateTo('landing');
+}
+
 // ============================================================================
-// 8. LANDING PAGE & AUTHENTICATION (SIGN IN & REGISTER)
+// 9. INCIDENT REPORTING & USER BLOCKING
 // ============================================================================
+function openReportModal(type, targetId) {
+  const typeInput = document.getElementById('report-type-input');
+  const targetIdInput = document.getElementById('report-target-id-input');
+  const desc = document.getElementById('report-target-desc');
+
+  if (typeInput) typeInput.value = type === 'TASK' ? 'TASK_REPORT' : 'USER_REPORT';
+  if (targetIdInput) targetIdInput.value = targetId || '';
+  if (desc) {
+    desc.textContent = type === 'TASK'
+      ? `Reporting Task #${targetId}. Our moderation team investigates all complaints.`
+      : `Reporting User ID #${targetId}. Reports remain strictly confidential.`;
+  }
+  openModal('modal-report');
+}
+
+async function handleReportSubmit(event) {
+  event.preventDefault();
+  if (!State.currentUser) {
+    showToast('Please sign in to file a report.', 'error');
+    return;
+  }
+
+  const reportType = document.getElementById('report-type-input').value;
+  const targetId = document.getElementById('report-target-id-input').value;
+  const reason = document.getElementById('report-reason-select').value;
+  const description = document.getElementById('report-description-input').value.trim();
+
+  const payload = {
+    reporterUserId: State.currentUser.id,
+    reportedUserId: reportType === 'USER_REPORT' ? targetId : null,
+    reportedTaskId: reportType === 'TASK_REPORT' ? targetId : null,
+    reportType,
+    reason,
+    description
+  };
+
+  try {
+    await API.fileReport(payload);
+    closeModal('modal-report');
+    showToast('Incident report filed. Platform moderators have been notified. 🛡️', 'success');
+    document.getElementById('report-submission-form').reset();
+  } catch (error) {
+    showToast('Failed to submit report', 'error');
+  }
+}
+
+async function handleBlockPosterFromModal() {
+  if (!State.currentUser) return;
+  if (!currentOpenedTaskId) return;
+
+  try {
+    const task = await API.getTaskById(currentOpenedTaskId);
+    if (!task) return;
+
+    if (confirm(`Are you sure you want to block ${task.posterName}? You will not see their tasks or receive interactions from them.`)) {
+      await API.blockUser(State.currentUser.id, task.posterId);
+      closeModal('modal-task-details');
+      showToast(`User ${task.posterName} has been blocked.`, 'info');
+      await State.refreshCurrentUser();
+      loadFindWorkData();
+    }
+  } catch (e) {
+    showToast('Error blocking user', 'error');
+  }
+}
+
+// Landing tasks preview
 async function loadLandingPageData() {
   const container = document.getElementById('landing-tasks-preview-grid');
   if (!container) return;
@@ -1211,7 +1533,7 @@ async function loadLandingPageData() {
           <div class="poster-mini-info">
             <img src="${t.posterAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + t.posterName}" class="poster-mini-avatar" alt="${t.posterName}">
             <div>
-              <div class="poster-mini-name">${t.posterName} <i class="fa-solid fa-circle-check verified-icon"></i></div>
+              <div class="poster-mini-name">${t.posterName} <span class="task-status-badge status-payment_released" style="font-size:0.6rem; padding:1px 4px;"><i class="fa-solid fa-circle-check"></i> Verified</span></div>
               <div class="poster-mini-rating"><i class="fa-solid fa-star"></i> ${t.posterRating || '5.0'}</div>
             </div>
           </div>
@@ -1231,7 +1553,7 @@ function handleLandingTaskClick(taskId) {
     openAuthModal('login');
     showToast('Please sign in or create an account to accept tasks', 'info');
   } else {
-    openTaskModal(taskId);
+    openTaskDetails(taskId);
   }
 }
 
@@ -1255,83 +1577,4 @@ function switchAuthTab(tab) {
   if (title) title.textContent = isLogin ? 'Sign In to LocalJobs' : 'Create Dual-Role Account';
 }
 
-async function handleLoginSubmit(event) {
-  event.preventDefault();
-  const identifier = document.getElementById('login-identifier').value.trim();
-  const password = document.getElementById('login-password').value;
-
-  try {
-    const user = await API.loginUser(identifier, password);
-    if (user && user.id) {
-      await State.setCurrentUser(user);
-      closeModal('modal-auth');
-      showToast(`Welcome back, ${user.name}! 👋`, 'success');
-      navigateTo('home');
-    } else {
-      showToast('User not found. Try a demo persona or create an account.', 'error');
-    }
-  } catch (error) {
-    showToast('Login failed. Please check your email/phone.', 'error');
-  }
-}
-
-async function quickDemoLogin(email) {
-  try {
-    let user = State.allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (!user) {
-      user = await API.loginUser(email, 'password123');
-    }
-    if (user) {
-      await State.setCurrentUser(user);
-      closeModal('modal-auth');
-      showToast(`Logged in as ${user.name} ⚡`, 'success');
-      navigateTo('home');
-    }
-  } catch (error) {
-    showToast('Failed to log in with demo persona', 'error');
-  }
-}
-
-async function handleRegisterSubmit(event) {
-  event.preventDefault();
-  const name = document.getElementById('reg-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const phone = document.getElementById('reg-phone').value.trim();
-  const location = document.getElementById('reg-location').value.trim();
-  const skillsInput = document.getElementById('reg-skills').value.trim();
-  const bio = document.getElementById('reg-bio').value.trim();
-
-  const skills = skillsInput ? skillsInput.split(',').map(s => s.trim()).filter(Boolean) : ['General Work'];
-
-  const payload = {
-    name,
-    email,
-    phone,
-    location,
-    latitude: 15.5057 + (Math.random() - 0.5) * 0.02,
-    longitude: 80.0499 + (Math.random() - 0.5) * 0.02,
-    skills,
-    bio: bio || 'Local member ready for micro-tasks and neighborhood gigs.'
-  };
-
-  try {
-    const user = await API.registerUser(payload);
-    if (user && user.id) {
-      const refreshedUsers = await API.getUsers();
-      State.allUsers = refreshedUsers || [];
-      await State.setCurrentUser(user);
-      closeModal('modal-auth');
-      showToast(`Account created! Welcome to LocalJobs, ${user.name}! 🎉`, 'success');
-      navigateTo('home');
-    }
-  } catch (error) {
-    showToast('Registration failed. Please check details.', 'error');
-  }
-}
-
-function handleLogout() {
-  State.logout();
-  showToast('You have been signed out.', 'info');
-  navigateTo('landing');
-}
 
