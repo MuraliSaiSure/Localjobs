@@ -25,7 +25,7 @@
   <header class="header">
     <div class="header-content">
       <!-- Logo & Tagline -->
-      <div class="brand-logo" onclick="navigateTo('home')">
+      <div class="brand-logo" onclick="handleBrandClick()">
         <div class="brand-icon">
           <i class="fa-solid fa-bolt-lightning"></i>
         </div>
@@ -35,8 +35,27 @@
         </div>
       </div>
 
-      <!-- Desktop Navigation Links -->
-      <nav class="desktop-nav">
+      <!-- Guest / Public Nav Links (Visible when on landing page or logged out) -->
+      <nav class="desktop-nav" id="nav-guest" style="display: none;">
+        <button class="nav-link active" onclick="navigateTo('landing')">
+          <i class="fa-solid fa-sparkles"></i> Overview
+        </button>
+        <button class="nav-link" onclick="scrollToSection('landing-how')">
+          <i class="fa-solid fa-timeline"></i> How It Works
+        </button>
+        <button class="nav-link" onclick="scrollToSection('landing-preview')">
+          <i class="fa-solid fa-fire"></i> Live Tasks
+        </button>
+        <button class="nav-link" onclick="scrollToSection('landing-safety')">
+          <i class="fa-solid fa-shield-halved"></i> Safety & Escrow
+        </button>
+      </nav>
+
+      <!-- App Desktop Navigation Links (Visible when logged in) -->
+      <nav class="desktop-nav" id="nav-user">
+        <button class="nav-link" data-screen="landing" onclick="navigateTo('landing')">
+          <i class="fa-solid fa-globe"></i> About
+        </button>
         <button class="nav-link active" data-screen="home" onclick="navigateTo('home')">
           <i class="fa-solid fa-house"></i> Home
         </button>
@@ -56,26 +75,44 @@
           <i class="fa-solid fa-user"></i> Profile
         </button>
         <button class="nav-link" data-screen="admin" onclick="navigateTo('admin')" style="background:#f3e8ff; color:#7e22ce; border: 1px solid #d8b4fe; font-weight:700;">
-          <i class="fa-solid fa-shield-halved"></i> Admin Panel
+          <i class="fa-solid fa-shield-halved"></i> Admin
         </button>
       </nav>
 
-      <!-- User Persona Switcher & Notifications -->
+      <!-- Header Actions (Sign In / Register for Guests, Persona & Bell for Logged In) -->
       <div class="header-actions">
-        <!-- Persona Quick Switcher -->
-        <div class="persona-switcher" onclick="openPersonaModal()" title="Click to switch persona or register">
-          <img id="header-avatar" class="persona-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=MuraliSai" alt="User">
-          <div class="persona-details">
-            <span id="header-user-name" class="persona-name">Murali Sai</span>
-            <span id="header-user-role" class="persona-role-badge">Dual Account <i class="fa-solid fa-arrows-rotate"></i></span>
-          </div>
+        <!-- Guest Action Buttons -->
+        <div id="header-guest-actions" style="display: none; align-items: center; gap: 0.6rem;">
+          <button class="btn btn-outline btn-sm" onclick="openAuthModal('login')">
+            <i class="fa-solid fa-right-to-bracket"></i> Sign In
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="openAuthModal('register')">
+            <i class="fa-solid fa-user-plus"></i> Get Started
+          </button>
         </div>
 
-        <!-- Notification Bell -->
-        <button class="notif-bell-btn" onclick="openNotificationsModal()" title="Notifications">
-          <i class="fa-solid fa-bell"></i>
-          <span id="notif-badge" class="notif-badge-count" style="display: none;">0</span>
-        </button>
+        <!-- Logged In User Elements -->
+        <div id="header-user-actions" style="display: flex; align-items: center; gap: 0.75rem;">
+          <!-- Persona Quick Switcher -->
+          <div class="persona-switcher" onclick="openPersonaModal()" title="Click to switch persona or test account">
+            <img id="header-avatar" class="persona-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=MuraliSai" alt="User">
+            <div class="persona-details">
+              <span id="header-user-name" class="persona-name">Murali Sai</span>
+              <span id="header-user-role" class="persona-role-badge">Dual Account <i class="fa-solid fa-arrows-rotate"></i></span>
+            </div>
+          </div>
+
+          <!-- Notification Bell -->
+          <button class="notif-bell-btn" onclick="openNotificationsModal()" title="Notifications">
+            <i class="fa-solid fa-bell"></i>
+            <span id="notif-badge" class="notif-badge-count" style="display: none;">0</span>
+          </button>
+
+          <!-- Quick Log Out Button -->
+          <button class="notif-bell-btn" onclick="handleLogout()" title="Log out to landing page" style="color: var(--text-muted);">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -85,7 +122,205 @@
        ====================================================================== -->
   <main class="main-container">
 
-    <!-- 1. HOME SCREEN -->
+    <!-- ==================================================================
+         0. PUBLIC MARKETING LANDING PAGE SCREEN
+         ================================================================== -->
+    <section id="screen-landing" class="screen-view">
+      <!-- Landing Hero Banner -->
+      <div class="landing-hero">
+        <div class="landing-hero-content">
+          <div class="landing-badge">
+            <i class="fa-solid fa-bolt text-accent"></i> The Next-Gen Hyperlocal Micro-Task Marketplace
+          </div>
+          <h1 class="landing-hero-title">
+            Find flexible work.<br>
+            <span class="gradient-text">Earn cash nearby.</span>
+          </h1>
+          <p class="landing-hero-desc">
+            LocalJobs connects people who need urgent micro-tasks completed with nearby students, freelancers, and local workers. From 30-minute shifts to full-day gigs, discover opportunities within walking distance and receive instant wallet payouts.
+          </p>
+
+          <div class="landing-cta-row">
+            <button class="btn btn-primary btn-lg" onclick="openAuthModal('register')">
+              <i class="fa-solid fa-user-plus"></i> Join LocalJobs Free
+            </button>
+            <button class="btn btn-outline-white btn-lg" onclick="navigateTo('find')">
+              <i class="fa-solid fa-compass"></i> Explore Live Tasks
+            </button>
+            <button class="btn btn-outline-white btn-lg" onclick="openAuthModal('login')">
+              <i class="fa-solid fa-right-to-bracket"></i> Sign In to Account
+            </button>
+          </div>
+
+          <!-- Live Impact Metrics -->
+          <div class="landing-stats-grid">
+            <div class="landing-stat-item">
+              <span class="landing-stat-number">5,200+</span>
+              <span class="landing-stat-label">Tasks Completed</span>
+            </div>
+            <div class="landing-stat-item">
+              <span class="landing-stat-number">₹18.5 Lakh+</span>
+              <span class="landing-stat-label">Paid to Workers</span>
+            </div>
+            <div class="landing-stat-item">
+              <span class="landing-stat-number">&lt; 15 Mins</span>
+              <span class="landing-stat-label">Average Match Time</span>
+            </div>
+            <div class="landing-stat-item">
+              <span class="landing-stat-number">100%</span>
+              <span class="landing-stat-label">Escrow Protected</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. HOW IT WORKS SECTION -->
+      <div id="landing-how" class="landing-section">
+        <div class="landing-section-header text-center">
+          <div class="section-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> Simple & Seamless</div>
+          <h2 class="landing-section-title">How LocalJobs Works</h2>
+          <p class="landing-section-desc">Experience a frictionless 3-step workflow engineered for speed, trust, and instant rewards.</p>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-icon-wrap" style="background:#eef2ff; color:#4f46e5;">
+              <i class="fa-solid fa-location-crosshairs"></i>
+              <span class="step-number">1</span>
+            </div>
+            <h3 class="step-title">Discover or Post</h3>
+            <p class="step-desc">Post a micro-task with a fixed cash reward (₹) and location, or search nearby gigs within 1 km to 10 km using real-time geolocation.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-icon-wrap" style="background:#ecfeff; color:#0891b2;">
+              <i class="fa-solid fa-handshake"></i>
+              <span class="step-number">2</span>
+            </div>
+            <h3 class="step-title">Accept & Execute</h3>
+            <p class="step-desc">Workers accept tasks in 1 click. Real-time status tracking guides both parties through Acceptance, In-Progress, and Completion.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-icon-wrap" style="background:#ecfdf5; color:#10b981;">
+              <i class="fa-solid fa-wallet"></i>
+              <span class="step-number">3</span>
+            </div>
+            <h3 class="step-title">Instant Release & Rating</h3>
+            <p class="step-desc">Poster verifies completion and releases funds directly into the worker's wallet with immutable ledger records and mutual 5-star reviews.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. DUAL-ROLE POWER SECTION -->
+      <div class="landing-dual-role-card">
+        <div class="dual-role-left">
+          <div class="section-tag" style="background:rgba(255,255,255,0.15); color:white;"><i class="fa-solid fa-arrows-rotate"></i> The Dual-Role Advantage</div>
+          <h2 style="font-size:1.85rem; font-weight:800; margin-bottom:1rem; line-height:1.25;">One Account. Unlimited Flexibility.</h2>
+          <p style="color:#e0e7ff; margin-bottom:1.5rem; line-height:1.6;">
+            Unlike traditional job boards that lock you into a single role, <strong>every LocalJobs user can both Post Work and Accept Work</strong>. Hire help for your event in the morning, and pick up a high-paying delivery or tutoring shift in the evening.
+          </p>
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <button class="btn btn-white" onclick="openAuthModal('register')"><i class="fa-solid fa-bolt"></i> Create Dual Account</button>
+            <button class="btn btn-outline-white" onclick="openAuthModal('login')"><i class="fa-solid fa-user-check"></i> Sign In</button>
+          </div>
+        </div>
+        <div class="dual-role-right">
+          <div class="dual-box">
+            <div class="dual-box-header">
+              <i class="fa-solid fa-bullhorn text-primary" style="font-size:1.5rem;"></i>
+              <div>
+                <strong style="display:block; color:var(--secondary);">When You Need Help</strong>
+                <span style="font-size:0.8rem; color:var(--text-muted);">Post in 60 seconds</span>
+              </div>
+            </div>
+            <ul class="dual-list">
+              <li><i class="fa-solid fa-circle-check text-success"></i> Fixed rewards with zero hidden platform cut</li>
+              <li><i class="fa-solid fa-circle-check text-success"></i> Choose verified, nearby skilled workers</li>
+              <li><i class="fa-solid fa-circle-check text-success"></i> Escrow balance released only upon satisfaction</li>
+            </ul>
+          </div>
+
+          <div class="dual-box">
+            <div class="dual-box-header">
+              <i class="fa-solid fa-money-bill-wave text-success" style="font-size:1.5rem;"></i>
+              <div>
+                <strong style="display:block; color:var(--secondary);">When You Want to Earn</strong>
+                <span style="font-size:0.8rem; color:var(--text-muted);">Work on your schedule</span>
+              </div>
+            </div>
+            <ul class="dual-list">
+              <li><i class="fa-solid fa-circle-check text-success"></i> Browse gigs filtered by walking distance (1–5 km)</li>
+              <li><i class="fa-solid fa-circle-check text-success"></i> Instant reward credit to your digital wallet</li>
+              <li><i class="fa-solid fa-circle-check text-success"></i> Build a verified 5-star local work reputation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. LIVE FEATURED TASKS PREVIEW -->
+      <div id="landing-preview" class="landing-section">
+        <div class="landing-section-header">
+          <div>
+            <div class="section-tag"><i class="fa-solid fa-fire"></i> Live Opportunities</div>
+            <h2 class="landing-section-title">Explore Active Micro-Tasks</h2>
+          </div>
+          <button class="btn btn-outline" onclick="navigateTo('find')">
+            View All Gigs <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <div class="tasks-grid" id="landing-tasks-preview-grid">
+          <!-- Dynamic landing tasks preview -->
+        </div>
+      </div>
+
+      <!-- 4. TRUST & SAFETY SECTION -->
+      <div id="landing-safety" class="landing-section" style="border-top:1px solid var(--border-color); padding-top:3rem;">
+        <div class="landing-section-header text-center">
+          <div class="section-tag"><i class="fa-solid fa-shield-halved"></i> Safety First</div>
+          <h2 class="landing-section-title">Built with Bank-Grade Trust & Safety</h2>
+          <p class="landing-section-desc">Every layer of LocalJobs is engineered to protect both task posters and workers.</p>
+        </div>
+
+        <div class="safety-grid">
+          <div class="safety-item">
+            <i class="fa-solid fa-id-card safety-icon" style="color:var(--primary);"></i>
+            <h4>Verified Identities</h4>
+            <p>Admin verification badges and authentic phone numbers prevent spam and fake personas.</p>
+          </div>
+          <div class="safety-item">
+            <i class="fa-solid fa-vault safety-icon" style="color:#10b981;"></i>
+            <h4>Simulated Escrow Protection</h4>
+            <p>Rewards are guaranteed and released only when the poster approves the completed work.</p>
+          </div>
+          <div class="safety-item">
+            <i class="fa-solid fa-star safety-icon" style="color:#f59e0b;"></i>
+            <h4>Two-Way Reputation</h4>
+            <p>Mutual 1–5 star reviews establish transparent reliability for posters and workers alike.</p>
+          </div>
+          <div class="safety-item">
+            <i class="fa-solid fa-map-location-dot safety-icon" style="color:#0891b2;"></i>
+            <h4>Precise Geolocation</h4>
+            <p>Exact distance calculations in kilometers eliminate unexpected travel friction.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Landing Call To Action Footer Banner -->
+      <div class="landing-cta-banner">
+        <h2>Ready to earn or get work done nearby?</h2>
+        <p>Join hundreds of local workers and posters in Ongole and surrounding areas today.</p>
+        <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:1.5rem;">
+          <button class="btn btn-primary btn-lg" onclick="openAuthModal('register')"><i class="fa-solid fa-user-plus"></i> Create Free Account</button>
+          <button class="btn btn-outline-white btn-lg" onclick="openAuthModal('login')"><i class="fa-solid fa-right-to-bracket"></i> Sign In to Dashboard</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         1. HOME SCREEN (LOGGED IN DASHBOARD)
+         ================================================================== -->
     <section id="screen-home" class="screen-view active">
       <!-- Hero Banner -->
       <div class="hero-banner">
@@ -136,307 +371,274 @@
         </button>
       </div>
 
-      <!-- Nearby Task Grid -->
+      <!-- Tasks Grid -->
       <div class="tasks-grid" id="home-tasks-grid">
         <!-- Dynamic Task Cards -->
       </div>
     </section>
 
-    <!-- 2. FIND WORK SCREEN -->
+    <!-- ==================================================================
+         2. FIND WORK SCREEN (SEARCH & FILTERS)
+         ================================================================== -->
     <section id="screen-find" class="screen-view">
       <div class="section-header">
         <div>
-          <h2 class="section-title"><i class="fa-solid fa-compass"></i> Discover Nearby Tasks</h2>
-          <p class="section-subtitle">Filter by distance, category, reward, or duration</p>
+          <h2 class="section-title"><i class="fa-solid fa-compass"></i> Find Work Nearby</h2>
+          <p class="section-subtitle">Discover tasks filtered by category, distance, and duration</p>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="navigateTo('post')">
-          <i class="fa-solid fa-plus"></i> Post Task
-        </button>
       </div>
 
-      <!-- Search Bar -->
+      <!-- Search Input -->
       <div class="search-container">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input type="text" id="find-search-input" class="search-input" placeholder="Search task title, skills, description..." oninput="debounceFindSearch()">
-        <button class="btn btn-outline btn-sm" onclick="resetFilters()">Reset</button>
+        <input type="text" id="find-search-input" class="search-input" placeholder="Search by title, location, or skill..." oninput="handleFindFilterChange()">
       </div>
 
       <!-- Filter Controls Bar -->
       <div class="filter-controls-row">
-        <!-- Category Filter -->
         <div class="filter-group">
-          <label class="form-label" style="margin:0; font-size:0.8rem;"><i class="fa-solid fa-filter"></i> Category:</label>
-          <select id="filter-category-select" class="filter-select" onchange="applyFilters()">
+          <label class="form-label" style="font-size:0.8rem; margin:0;"><i class="fa-solid fa-filter"></i> Category:</label>
+          <select id="filter-category-select" class="filter-select" onchange="handleFindFilterChange()">
             <option value="All">All Categories</option>
             <option value="Restaurants">Restaurants</option>
-            <option value="Retail">Retail</option>
+            <option value="Retail & Shops">Retail & Shops</option>
             <option value="Events">Events</option>
             <option value="Office">Office</option>
-            <option value="Construction">Construction</option>
             <option value="Delivery">Delivery</option>
             <option value="IT & Software">IT & Software</option>
             <option value="Data Entry">Data Entry</option>
-            <option value="Education">Education</option>
+            <option value="Education & Labs">Education & Labs</option>
             <option value="Warehouse">Warehouse</option>
-            <option value="Sales">Sales</option>
+            <option value="Sales & Marketing">Sales & Marketing</option>
             <option value="Other">Other</option>
           </select>
         </div>
 
-        <!-- Distance Filter -->
         <div class="filter-group">
-          <label class="form-label" style="margin:0; font-size:0.8rem;"><i class="fa-solid fa-route"></i> Distance:</label>
-          <select id="filter-distance-select" class="filter-select" onchange="applyFilters()">
-            <option value="">Any Distance</option>
-            <option value="1">Within 1 km</option>
+          <label class="form-label" style="font-size:0.8rem; margin:0;"><i class="fa-solid fa-location-dot"></i> Max Distance:</label>
+          <select id="filter-distance-select" class="filter-select" onchange="handleFindFilterChange()">
+            <option value="all">Any Distance</option>
+            <option value="1">Within 1 km (Walking)</option>
             <option value="3">Within 3 km</option>
-            <option value="5">Within 5 km</option>
+            <option value="5" selected>Within 5 km</option>
             <option value="10">Within 10 km</option>
           </select>
         </div>
 
-        <!-- Duration Filter -->
         <div class="filter-group">
-          <label class="form-label" style="margin:0; font-size:0.8rem;"><i class="fa-solid fa-clock"></i> Duration:</label>
-          <select id="filter-duration-select" class="filter-select" onchange="applyFilters()">
-            <option value="All">Any Duration</option>
-            <option value="30 minutes">30 minutes</option>
-            <option value="1 hour">1 hour</option>
-            <option value="hours">2–4 hours</option>
-            <option value="Half day">Half day</option>
-            <option value="day">Full day</option>
-          </select>
-        </div>
-
-        <!-- Reward Sort -->
-        <div class="filter-group">
-          <label class="form-label" style="margin:0; font-size:0.8rem;"><i class="fa-solid fa-arrow-down-wide-short"></i> Sort Reward:</label>
-          <select id="filter-sort-select" class="filter-select" onchange="applyFilters()">
-            <option value="">Nearest First</option>
+          <label class="form-label" style="font-size:0.8rem; margin:0;"><i class="fa-solid fa-arrow-down-wide-short"></i> Sort Reward:</label>
+          <select id="filter-sort-select" class="filter-select" onchange="handleFindFilterChange()">
+            <option value="default">Default (Nearest First)</option>
             <option value="highest">Highest Reward (₹)</option>
             <option value="lowest">Lowest Reward (₹)</option>
           </select>
         </div>
       </div>
 
-      <!-- Task Cards Feed -->
+      <!-- Find Tasks Grid -->
       <div class="tasks-grid" id="find-tasks-grid">
-        <!-- Dynamic Filtered Cards -->
+        <!-- Dynamic Results -->
       </div>
     </section>
 
-    <!-- 3. POST TASK SCREEN -->
+    <!-- ==================================================================
+         3. POST WORK SCREEN (TASK CREATION FORM)
+         ================================================================== -->
     <section id="screen-post" class="screen-view">
       <div class="form-card">
-        <div style="text-align: center; margin-bottom: 1.5rem;">
-          <div class="brand-icon" style="margin: 0 auto 0.75rem;"><i class="fa-solid fa-bullhorn"></i></div>
-          <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--secondary);">Post a New Micro-Task</h2>
-          <p style="font-size: 0.88rem; color: var(--text-muted);">Set fixed reward, duration, and time. Nearby workers can discover and accept immediately.</p>
+        <div class="section-header" style="margin-bottom: 0.5rem;">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-circle-plus text-primary"></i> Post a Micro-Task</h2>
+            <p class="section-subtitle">Connect with nearby workers in minutes. Set a fixed reward and schedule.</p>
+          </div>
         </div>
 
-        <form id="post-task-form" onsubmit="handlePostTaskSubmit(event)">
+        <form id="form-post-task" onsubmit="handlePostTaskSubmit(event)">
           <div class="form-grid">
-            <!-- Title -->
             <div class="form-group full-width">
               <label class="form-label">Task Title <span>*</span></label>
-              <input type="text" id="post-title" class="form-control" placeholder="e.g. Restaurant Helper for Evening Dinner Rush" required>
+              <input type="text" id="post-title" class="form-control" placeholder="e.g. Restaurant Helper for Evening Shift" required>
             </div>
 
-            <!-- Category -->
             <div class="form-group">
               <label class="form-label">Category <span>*</span></label>
               <select id="post-category" class="form-control" required>
-                <option value="Restaurants">Restaurants</option>
-                <option value="Retail">Retail & Shop</option>
-                <option value="Events">Events & Coordination</option>
-                <option value="Office">Office Assistant</option>
-                <option value="Construction">Construction Helper</option>
-                <option value="Delivery">Delivery & Field</option>
-                <option value="IT & Software">IT & Software</option>
-                <option value="Data Entry">Data Entry</option>
-                <option value="Education">Education & Lab</option>
-                <option value="Warehouse">Warehouse & Packing</option>
-                <option value="Sales">Sales & Marketing</option>
-                <option value="Other">Other Legitimate Work</option>
+                <option value="Restaurants">Restaurants (Kitchen, Helper, Counter)</option>
+                <option value="Retail & Shops">Retail & Shops (Sales, Inventory, Billing)</option>
+                <option value="Events">Events (Support, Registration, Coordination)</option>
+                <option value="Office">Office (Filing, Documentation, Admin)</option>
+                <option value="Delivery">Delivery (Hyperlocal, Courier, Grocery)</option>
+                <option value="IT & Software">IT & Software (Lab Setup, Network, Testing)</option>
+                <option value="Data Entry">Data Entry (Excel, Typing, Transcription)</option>
+                <option value="Education & Labs">Education & Labs (Tutor, Assistant)</option>
+                <option value="Warehouse">Warehouse (Packing, Sorting, Lifting)</option>
+                <option value="Sales & Marketing">Sales & Marketing (Promotions, Flyers)</option>
+                <option value="Other">Other Local Micro-Work</option>
               </select>
             </div>
 
-            <!-- Reward (₹) -->
             <div class="form-group">
-              <label class="form-label">Fixed Reward (₹ INR) <span>*</span></label>
-              <input type="number" id="post-reward" class="form-control" placeholder="e.g. 400" min="50" step="50" required>
+              <label class="form-label">Reward Amount (₹) <span>*</span></label>
+              <input type="number" id="post-reward" class="form-control" placeholder="e.g. 400" min="50" step="10" required>
+              <span class="form-helper">Fixed amount paid to the worker upon completion.</span>
             </div>
 
-            <!-- Duration -->
             <div class="form-group">
               <label class="form-label">Estimated Duration <span>*</span></label>
               <select id="post-duration" class="form-control" required>
                 <option value="30 minutes">30 minutes</option>
                 <option value="1 hour">1 hour</option>
                 <option value="2 hours">2 hours</option>
-                <option value="3 hours">3 hours</option>
-                <option value="4 hours">4 hours</option>
-                <option value="Half day">Half day (4-5 hours)</option>
-                <option value="1 day">1 day (Full day)</option>
-                <option value="2-3 days">Multiple days (2-3 days)</option>
+                <option value="3 hours" selected>3 hours</option>
+                <option value="4 hours (Half Day)">4 hours (Half Day)</option>
+                <option value="8 hours (Full Day)">8 hours (Full Day)</option>
+                <option value="2-3 Days">2–3 Days</option>
               </select>
             </div>
 
-            <!-- Date -->
             <div class="form-group">
-              <label class="form-label">Date <span>*</span></label>
-              <select id="post-date" class="form-control" required>
-                <option value="Today">Today</option>
-                <option value="Tomorrow">Tomorrow</option>
-                <option value="This Weekend">This Weekend</option>
-                <option value="Flexible">Flexible</option>
-              </select>
+              <label class="form-label">Date & Time <span>*</span></label>
+              <input type="text" id="post-date-time" class="form-control" placeholder="e.g. Today • 6:00 PM – 9:00 PM" required>
             </div>
 
-            <!-- Start Time -->
-            <div class="form-group">
-              <label class="form-label">Start Time</label>
-              <input type="text" id="post-start-time" class="form-control" placeholder="e.g. 6:00 PM">
-            </div>
-
-            <!-- End Time -->
-            <div class="form-group">
-              <label class="form-label">End Time</label>
-              <input type="text" id="post-end-time" class="form-control" placeholder="e.g. 9:00 PM">
-            </div>
-
-            <!-- Location Address -->
             <div class="form-group full-width">
-              <label class="form-label">Location / Area <span>*</span></label>
-              <input type="text" id="post-location" class="form-control" placeholder="e.g. Grand Kitchen, Trunk Road, Ongole" required>
-              <span class="form-helper"><i class="fa-solid fa-lock"></i> Exact street address is kept private until task is accepted.</span>
+              <label class="form-label">Location / Address <span>*</span></label>
+              <input type="text" id="post-location" class="form-control" placeholder="e.g. Grand Spice Kitchen, Trunk Road, Ongole" required>
             </div>
 
-            <!-- Required Skills -->
             <div class="form-group full-width">
               <label class="form-label">Required Skills (Comma separated)</label>
-              <input type="text" id="post-skills" class="form-control" placeholder="e.g. Fast Typing, Excel, Punctuality">
+              <input type="text" id="post-skills" class="form-control" placeholder="e.g. Punctual, Food Service, Friendly">
             </div>
 
-            <!-- Description -->
             <div class="form-group full-width">
-              <label class="form-label">Detailed Description <span>*</span></label>
-              <textarea id="post-desc" class="form-control" placeholder="Explain what the worker needs to do, expectations, and any amenities provided..." required></textarea>
+              <label class="form-label">Task Description & Instructions <span>*</span></label>
+              <textarea id="post-description" class="form-control" rows="4" placeholder="Detail the duties, requirements, dress code, or specific instructions..." required></textarea>
             </div>
           </div>
 
-          <div style="margin-top: 1.75rem; display: flex; gap: 1rem; justify-content: flex-end;">
+          <div style="margin-top: 1.75rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
             <button type="button" class="btn btn-outline" onclick="navigateTo('home')">Cancel</button>
-            <button type="submit" class="btn btn-primary btn-lg"><i class="fa-solid fa-paper-plane"></i> Publish Task</button>
+            <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-task">
+              <i class="fa-solid fa-paper-plane"></i> Publish Task Now
+            </button>
           </div>
         </form>
       </div>
     </section>
 
-    <!-- 4. MY TASKS SCREEN -->
+    <!-- ==================================================================
+         4. MY TASKS SCREEN (LIFECYCLE MANAGEMENT)
+         ================================================================== -->
     <section id="screen-mytasks" class="screen-view">
       <div class="section-header">
         <div>
-          <h2 class="section-title"><i class="fa-solid fa-list-check"></i> My Tasks Manager</h2>
-          <p class="section-subtitle">Manage both tasks you have posted and tasks you accepted to work on</p>
+          <h2 class="section-title"><i class="fa-solid fa-list-check"></i> My Tasks & Operations</h2>
+          <p class="section-subtitle">Manage tasks you posted or accepted through the 5-stage lifecycle</p>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="navigateTo('post')">
-          <i class="fa-solid fa-plus"></i> Post New Task
-        </button>
       </div>
 
-      <!-- Status Tabs Navigation -->
+      <!-- Workflow Tabs -->
       <div class="tabs-navigation">
-        <button class="tab-btn active" id="tab-posted" onclick="switchMyTasksTab('posted')">
-          <i class="fa-solid fa-arrow-up-from-bracket"></i> Tasks I Posted
-          <span class="tab-count" id="count-posted">0</span>
+        <button class="tab-btn active" data-tab="posted" onclick="switchMyTasksTab('posted')">
+          <i class="fa-solid fa-bullhorn"></i> Tasks I Posted <span class="tab-count" id="count-tab-posted">0</span>
         </button>
-        <button class="tab-btn" id="tab-accepted" onclick="switchMyTasksTab('accepted')">
-          <i class="fa-solid fa-handshake"></i> Tasks I Accepted
-          <span class="tab-count" id="count-accepted">0</span>
+        <button class="tab-btn" data-tab="accepted" onclick="switchMyTasksTab('accepted')">
+          <i class="fa-solid fa-briefcase"></i> Work I Accepted <span class="tab-count" id="count-tab-accepted">0</span>
         </button>
-        <button class="tab-btn" id="tab-completed" onclick="switchMyTasksTab('completed')">
-          <i class="fa-solid fa-circle-check"></i> Completed / Review
-          <span class="tab-count" id="count-completed">0</span>
+        <button class="tab-btn" data-tab="completed" onclick="switchMyTasksTab('completed')">
+          <i class="fa-solid fa-check-double"></i> Completed <span class="tab-count" id="count-tab-completed">0</span>
         </button>
-        <button class="tab-btn" id="tab-history" onclick="switchMyTasksTab('history')">
-          <i class="fa-solid fa-clock-rotate-left"></i> Payment Released
-          <span class="tab-count" id="count-history">0</span>
+        <button class="tab-btn" data-tab="released" onclick="switchMyTasksTab('released')">
+          <i class="fa-solid fa-money-bill-transfer"></i> Payment Released <span class="tab-count" id="count-tab-released">0</span>
         </button>
       </div>
 
       <!-- My Tasks Grid -->
       <div class="tasks-grid" id="mytasks-grid">
-        <!-- Dynamic Managed Tasks -->
+        <!-- Dynamic Tasks for selected tab -->
       </div>
     </section>
 
-    <!-- 5. EARNINGS & WALLET SCREEN -->
+    <!-- ==================================================================
+         5. EARNINGS & WALLET SCREEN
+         ================================================================== -->
     <section id="screen-earnings" class="screen-view">
       <div class="section-header">
         <div>
           <h2 class="section-title"><i class="fa-solid fa-wallet"></i> Earnings & Wallet</h2>
-          <p class="section-subtitle">Simulated reward balances and transaction ledger</p>
+          <p class="section-subtitle">Track your balance, completed task payouts, and financial ledger</p>
         </div>
       </div>
 
-      <!-- Wallet Metrics Cards -->
+      <!-- Wallet Metric Cards -->
       <div class="wallet-stats-grid">
-        <!-- Available Balance -->
         <div class="stat-card primary">
-          <div class="stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+          <div class="stat-icon">
+            <i class="fa-solid fa-vault"></i>
+          </div>
           <div class="stat-info">
             <span class="stat-title">Available Balance</span>
-            <span class="stat-value" id="wallet-balance">₹0</span>
-            <span class="stat-subtitle">Ready for withdrawal / posting</span>
+            <span class="stat-value" id="wallet-balance-val">₹0.00</span>
+            <span class="stat-subtitle">Ready for instant payout</span>
           </div>
         </div>
 
-        <!-- Total Earned -->
         <div class="stat-card">
-          <div class="stat-icon" style="background:#ecfdf5; color:#059669;"><i class="fa-solid fa-chart-line"></i></div>
+          <div class="stat-icon" style="color: var(--success); background: var(--success-light);">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+          </div>
           <div class="stat-info">
             <span class="stat-title">Total Earned</span>
-            <span class="stat-value" id="wallet-total-earned">₹0</span>
+            <span class="stat-value" id="wallet-total-earned">₹0.00</span>
             <span class="stat-subtitle">Lifetime earnings</span>
           </div>
         </div>
 
-        <!-- Completed Tasks -->
         <div class="stat-card">
-          <div class="stat-icon" style="background:#eff6ff; color:#3b82f6;"><i class="fa-solid fa-award"></i></div>
+          <div class="stat-icon" style="color: var(--accent-amber); background: var(--accent-amber-light);">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+          </div>
           <div class="stat-info">
-            <span class="stat-title">Completed Tasks</span>
-            <span class="stat-value" id="wallet-completed-count">0</span>
-            <span class="stat-subtitle">Successful jobs</span>
+            <span class="stat-title">Escrow In-Progress</span>
+            <span class="stat-value" id="wallet-escrow-val">₹0.00</span>
+            <span class="stat-subtitle">Held securely until verification</span>
           </div>
         </div>
       </div>
 
-      <!-- Transactions History -->
+      <!-- Transaction History Table -->
       <div class="transactions-card">
         <div class="section-header">
-          <h3 class="section-title" style="font-size:1.1rem;"><i class="fa-solid fa-receipt"></i> Recent Transactions</h3>
+          <h3 class="section-title" style="font-size:1.15rem;"><i class="fa-solid fa-receipt"></i> Transaction Ledger</h3>
+          <span class="section-subtitle">Immutable wallet events</span>
         </div>
+
         <div class="transactions-list" id="wallet-transactions-list">
-          <!-- Dynamic Transaction Records -->
+          <!-- Dynamic Transactions -->
         </div>
       </div>
     </section>
 
-    <!-- 6. PROFILE SCREEN -->
+    <!-- ==================================================================
+         6. USER PROFILE & REPUTATION SCREEN
+         ================================================================== -->
     <section id="screen-profile" class="screen-view">
       <!-- Profile Header Card -->
       <div class="profile-header-card">
         <div class="profile-main-info">
-          <img id="profile-avatar" class="profile-avatar-large" src="https://api.dicebear.com/7.x/avataaars/svg?seed=MuraliSai" alt="User">
+          <img id="profile-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=MuraliSai" class="profile-avatar-large" alt="Profile">
           <div>
-            <h2 id="profile-name" class="profile-name">Murali Sai <i class="fa-solid fa-circle-check verified-icon" title="Verified User"></i></h2>
+            <h2 class="profile-name" id="profile-display-name">
+              Murali Sai <i class="fa-solid fa-circle-check verified-icon" id="profile-verified-badge"></i>
+            </h2>
             <div class="profile-meta-row">
-              <span><i class="fa-solid fa-star text-accent" style="color:var(--accent);"></i> <strong id="profile-rating">4.8</strong> (<span id="profile-rating-count">18</span> reviews)</span>
-              <span><i class="fa-solid fa-briefcase"></i> <strong id="profile-tasks-count">24</strong> tasks completed</span>
-              <span><i class="fa-solid fa-location-dot"></i> <span id="profile-location">Ongole, AP</span></span>
+              <span><i class="fa-solid fa-star text-accent"></i> <strong id="profile-rating-val">4.8</strong> (<span id="profile-rating-count">18</span> reviews)</span>
+              <span><i class="fa-solid fa-briefcase"></i> <strong id="profile-completed-count">24</strong> tasks completed</span>
+              <span><i class="fa-solid fa-location-dot"></i> <span id="profile-location-val">Ongole, AP</span></span>
             </div>
+
+            <!-- Skills List -->
             <div class="skills-tags-container" id="profile-skills-list">
               <!-- Skill chips -->
             </div>
@@ -446,6 +648,7 @@
         <div style="display:flex; flex-direction:column; gap:0.5rem;">
           <button class="btn btn-outline" onclick="openPersonaModal()"><i class="fa-solid fa-user-gear"></i> Switch Persona</button>
           <button class="btn btn-primary" onclick="navigateTo('admin')" style="background:#7e22ce; border-color:#6b21a8;"><i class="fa-solid fa-shield-halved"></i> Open Admin Panel</button>
+          <button class="btn btn-outline" onclick="handleLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
         </div>
       </div>
 
@@ -468,73 +671,84 @@
       </div>
     </section>
 
-    <!-- 7. ADMIN DASHBOARD SCREEN -->
+    <!-- ==================================================================
+         7. ADMIN DASHBOARD SCREEN
+         ================================================================== -->
     <section id="screen-admin" class="screen-view">
       <div class="section-header">
         <div>
           <h2 class="section-title" style="color: #7e22ce;"><i class="fa-solid fa-shield-halved"></i> Platform Admin Control Panel</h2>
           <p class="section-subtitle">Real-time marketplace oversight, user verification, and task moderation</p>
         </div>
-        <a href="/h2-console" target="_blank" class="btn btn-outline btn-sm" style="color: #7e22ce; border-color: #d8b4fe;">
+        <a href="/h2-console" target="_blank" class="btn btn-outline btn-sm">
           <i class="fa-solid fa-database"></i> Open H2 SQL Console
         </a>
       </div>
 
-      <!-- Platform Metrics Grid -->
+      <!-- Admin Platform KPIs -->
       <div class="wallet-stats-grid">
-        <div class="stat-card" style="background: linear-gradient(135deg, #7e22ce, #9333ea); color: white; border: none;">
-          <div class="stat-icon" style="background: rgba(255,255,255,0.2); color: white;"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-card" style="border-left: 4px solid #7e22ce;">
+          <div class="stat-icon" style="background: #f3e8ff; color: #7e22ce;">
+            <i class="fa-solid fa-users"></i>
+          </div>
           <div class="stat-info">
-            <span class="stat-title" style="color:#f3e8ff;">Total Users</span>
-            <span class="stat-value" id="admin-total-users" style="color:white;">0</span>
-            <span class="stat-subtitle" style="color:#e9d5ff;">Registered participants</span>
+            <span class="stat-title">Total Users</span>
+            <span class="stat-value" id="admin-total-users">0</span>
+            <span class="stat-subtitle">Registered dual-accounts</span>
           </div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-icon" style="background:#fef3c7; color:#d97706;"><i class="fa-solid fa-clipboard-list"></i></div>
+        <div class="stat-card" style="border-left: 4px solid var(--primary);">
+          <div class="stat-icon" style="background: var(--primary-light); color: var(--primary);">
+            <i class="fa-solid fa-list-check"></i>
+          </div>
           <div class="stat-info">
             <span class="stat-title">Total Tasks</span>
             <span class="stat-value" id="admin-total-tasks">0</span>
-            <span class="stat-subtitle"><span id="admin-open-tasks">0</span> open • <span id="admin-active-tasks">0</span> active</span>
+            <span class="stat-subtitle"><span id="admin-open-tasks">0</span> Open • <span id="admin-active-tasks">0</span> Active</span>
           </div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-icon" style="background:#ecfdf5; color:#059669;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+        <div class="stat-card" style="border-left: 4px solid var(--success);">
+          <div class="stat-icon" style="background: var(--success-light); color: var(--success);">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+          </div>
           <div class="stat-info">
             <span class="stat-title">Gross Task Value</span>
-            <span class="stat-value" id="admin-total-value">₹0</span>
-            <span class="stat-subtitle">Total micro-rewards listed</span>
+            <span class="stat-value" id="admin-total-gmv">₹0</span>
+            <span class="stat-subtitle">Total rewards offered</span>
           </div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-icon" style="background:#eff6ff; color:#3b82f6;"><i class="fa-solid fa-handshake"></i></div>
+        <div class="stat-card" style="border-left: 4px solid var(--accent-amber);">
+          <div class="stat-icon" style="background: var(--accent-amber-light); color: var(--accent-amber);">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
           <div class="stat-info">
             <span class="stat-title">Completed Jobs</span>
             <span class="stat-value" id="admin-completed-tasks">0</span>
-            <span class="stat-subtitle">Successful payouts</span>
+            <span class="stat-subtitle"><span id="admin-total-reviews">0</span> verified reviews</span>
           </div>
         </div>
       </div>
 
-      <!-- Users Management Table -->
-      <div class="transactions-card" style="margin-bottom: 1.75rem;">
+      <!-- Admin Users Management Table -->
+      <div class="transactions-card" style="margin-bottom: 2rem;">
         <div class="section-header">
-          <h3 class="section-title" style="font-size:1.1rem;"><i class="fa-solid fa-user-shield"></i> User Accounts & Trust Management</h3>
+          <h3 class="section-title" style="font-size: 1.15rem;"><i class="fa-solid fa-user-shield"></i> User Accounts & Trust Management</h3>
+          <span class="section-subtitle">Toggle identity verification</span>
         </div>
         <div style="overflow-x: auto;">
-          <table style="width:100%; border-collapse: collapse; font-size:0.88rem; text-align:left;">
+          <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead>
-              <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted);">
-                <th style="padding:0.75rem 0.5rem;">User</th>
-                <th style="padding:0.75rem 0.5rem;">Email & Phone</th>
-                <th style="padding:0.75rem 0.5rem;">Location</th>
-                <th style="padding:0.75rem 0.5rem;">Rating</th>
-                <th style="padding:0.75rem 0.5rem;">Completed</th>
-                <th style="padding:0.75rem 0.5rem;">Wallet</th>
-                <th style="padding:0.75rem 0.5rem;">Status / Trust</th>
+              <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                <th style="padding: 0.75rem 0.5rem;">User</th>
+                <th style="padding: 0.75rem 0.5rem;">Contact</th>
+                <th style="padding: 0.75rem 0.5rem;">Location</th>
+                <th style="padding: 0.75rem 0.5rem;">Rating / Jobs</th>
+                <th style="padding: 0.75rem 0.5rem;">Balance</th>
+                <th style="padding: 0.75rem 0.5rem;">Status</th>
+                <th style="padding: 0.75rem 0.5rem; text-align: right;">Action</th>
               </tr>
             </thead>
             <tbody id="admin-users-table-body">
@@ -544,22 +758,22 @@
         </div>
       </div>
 
-      <!-- Tasks Moderation Table -->
+      <!-- Admin Tasks Moderation Table -->
       <div class="transactions-card">
         <div class="section-header">
-          <h3 class="section-title" style="font-size:1.1rem;"><i class="fa-solid fa-list-check"></i> Platform Tasks Moderation</h3>
+          <h3 class="section-title" style="font-size: 1.15rem;"><i class="fa-solid fa-clipboard-check"></i> Platform Tasks Moderation</h3>
+          <span class="section-subtitle">Review, inspect, or remove tasks</span>
         </div>
         <div style="overflow-x: auto;">
-          <table style="width:100%; border-collapse: collapse; font-size:0.88rem; text-align:left;">
+          <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead>
-              <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted);">
-                <th style="padding:0.75rem 0.5rem;">ID</th>
-                <th style="padding:0.75rem 0.5rem;">Task Title</th>
-                <th style="padding:0.75rem 0.5rem;">Category</th>
-                <th style="padding:0.75rem 0.5rem;">Poster</th>
-                <th style="padding:0.75rem 0.5rem;">Reward</th>
-                <th style="padding:0.75rem 0.5rem;">Status</th>
-                <th style="padding:0.75rem 0.5rem; text-align:center;">Action</th>
+              <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                <th style="padding: 0.75rem 0.5rem;">Task</th>
+                <th style="padding: 0.75rem 0.5rem;">Category</th>
+                <th style="padding: 0.75rem 0.5rem;">Reward</th>
+                <th style="padding: 0.75rem 0.5rem;">Poster</th>
+                <th style="padding: 0.75rem 0.5rem;">Status</th>
+                <th style="padding: 0.75rem 0.5rem; text-align: right;">Action</th>
               </tr>
             </thead>
             <tbody id="admin-tasks-table-body">
@@ -605,7 +819,109 @@
        MODALS & DIALOGS
        ====================================================================== -->
   
-  <!-- 1. Task Details Modal -->
+  <!-- 1. Dedicated Sign In & Sign Up Modal -->
+  <div id="modal-auth" class="modal-overlay">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <div class="brand-icon" style="width:32px; height:32px; font-size:1rem;">
+            <i class="fa-solid fa-bolt-lightning"></i>
+          </div>
+          <h2 class="modal-title" id="auth-modal-title">Sign In to LocalJobs</h2>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-auth')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Auth Tabs -->
+      <div class="tabs-navigation" style="margin-bottom:1.25rem;">
+        <button class="tab-btn active" id="tab-auth-login" onclick="switchAuthTab('login')">
+          <i class="fa-solid fa-right-to-bracket"></i> Sign In
+        </button>
+        <button class="tab-btn" id="tab-auth-register" onclick="switchAuthTab('register')">
+          <i class="fa-solid fa-user-plus"></i> Create Account
+        </button>
+      </div>
+
+      <!-- A. Login Form -->
+      <div id="auth-login-view">
+        <form onsubmit="handleLoginSubmit(event)">
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label">Email or Mobile Number <span>*</span></label>
+            <input type="text" id="login-identifier" class="form-control" placeholder="e.g. murali@localjobs.local or +91 98765 43210" required>
+          </div>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label">Password <span>*</span></label>
+            <input type="password" id="login-password" class="form-control" placeholder="Enter your password" value="password123" required>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; font-size:0.82rem;">
+            <label style="display:flex; align-items:center; gap:0.35rem; color:var(--text-muted); cursor:pointer;">
+              <input type="checkbox" checked> Remember me
+            </label>
+            <a href="javascript:void(0)" onclick="showToast('Password reset link sent to registered email.', 'info')" style="color:var(--primary); font-weight:600;">Forgot password?</a>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+          </button>
+        </form>
+
+        <!-- Quick 1-Click Demo Login -->
+        <div style="margin-top:1.5rem; border-top:1px solid var(--border-color); padding-top:1.25rem;">
+          <span style="display:block; font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.75rem; text-align:center;">
+            ⚡ Quick 1-Click Demo Personas
+          </span>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <button class="btn btn-outline btn-block" onclick="quickDemoLogin('murali@localjobs.local')" style="justify-content:flex-start;">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=MuraliSai" style="width:24px; height:24px; border-radius:50%; margin-right:6px;" alt="Murali">
+              <strong>Murali Sai</strong> — Task Poster & Worker (₹2,450)
+            </button>
+            <button class="btn btn-outline btn-block" onclick="quickDemoLogin('ravi@localjobs.local')" style="justify-content:flex-start;">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=RaviKumar" style="width:24px; height:24px; border-radius:50%; margin-right:6px;" alt="Ravi">
+              <strong>Ravi Kumar</strong> — Active Worker (₹1,200)
+            </button>
+            <button class="btn btn-outline btn-block" onclick="quickDemoLogin('ananya@localjobs.local')" style="justify-content:flex-start;">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=AnanyaSharma" style="width:24px; height:24px; border-radius:50%; margin-right:6px;" alt="Ananya">
+              <strong>Ananya Sharma</strong> — Poster & Tutor (₹3,100)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- B. Register Form -->
+      <div id="auth-register-view" style="display:none;">
+        <form onsubmit="handleRegisterSubmit(event)">
+          <div class="form-group" style="margin-bottom:0.85rem;">
+            <label class="form-label">Full Name <span>*</span></label>
+            <input type="text" id="reg-name" class="form-control" placeholder="e.g. Suresh Varma" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0.85rem;">
+            <label class="form-label">Email Address <span>*</span></label>
+            <input type="email" id="reg-email" class="form-control" placeholder="e.g. suresh@localjobs.local" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0.85rem;">
+            <label class="form-label">Mobile Number <span>*</span></label>
+            <input type="tel" id="reg-phone" class="form-control" placeholder="e.g. +91 98765 00000" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0.85rem;">
+            <label class="form-label">Neighborhood / City <span>*</span></label>
+            <input type="text" id="reg-location" class="form-control" placeholder="e.g. Lawyerpet, Ongole" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0.85rem;">
+            <label class="form-label">Skills (Comma separated)</label>
+            <input type="text" id="reg-skills" class="form-control" placeholder="e.g. Delivery, Photography, Excel, Tutoring">
+          </div>
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label">Short Bio</label>
+            <input type="text" id="reg-bio" class="form-control" placeholder="e.g. Student looking for local part-time micro-gigs.">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg">
+            <i class="fa-solid fa-user-plus"></i> Create Dual Account
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Task Details Modal -->
   <div id="modal-task-details" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
@@ -647,7 +963,7 @@
           <div>
             <div class="poster-mini-name" style="font-size:0.95rem;" id="modal-poster-name">Murali Sai <i class="fa-solid fa-circle-check verified-icon"></i></div>
             <div style="font-size:0.8rem; color:var(--text-muted);">
-              ★ <strong id="modal-poster-rating" style="color:var(--accent);">4.8</strong> • <span id="modal-poster-tasks">24</span> completed tasks • Verified Poster
+              ★ <strong id="modal-poster-rating" style="color:var(--accent-amber);">4.8</strong> • <span id="modal-poster-tasks">24</span> completed tasks • Verified Poster
             </div>
           </div>
         </div>
@@ -661,7 +977,7 @@
     </div>
   </div>
 
-  <!-- 2. Persona Switcher / Login Modal -->
+  <!-- 3. Persona Switcher Modal -->
   <div id="modal-persona" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
@@ -678,65 +994,64 @@
 
       <!-- Quick Register Persona -->
       <div style="border-top:1px solid var(--border-color); padding-top:1rem;">
-        <h4 style="font-size:0.85rem; font-weight:700; margin-bottom:0.5rem; color:var(--secondary);">Or Quick Register New Persona:</h4>
-        <form onsubmit="handleQuickRegister(event)" style="display:flex; gap:0.5rem;">
-          <input type="text" id="register-name" class="form-control" placeholder="Full Name (e.g. Suresh V)" required style="flex:2;">
-          <input type="email" id="register-email" class="form-control" placeholder="Email" required style="flex:2;">
-          <button type="submit" class="btn btn-primary btn-sm" style="flex:1;">Join</button>
-        </form>
+        <button class="btn btn-outline btn-block" onclick="closeModal('modal-persona'); openAuthModal('register');">
+          <i class="fa-solid fa-user-plus"></i> Register New User Persona
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- 3. Rating & Review Modal -->
+  <!-- 4. Interactive 5-Star Rating & Review Modal -->
   <div id="modal-rating" class="modal-overlay">
-    <div class="modal-card" style="max-width:480px; text-align:center;">
-      <div class="modal-header" style="justify-content:flex-end;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fa-solid fa-star text-accent"></i> Rate & Review</h2>
         <button class="modal-close-btn" onclick="closeModal('modal-rating')"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="brand-icon" style="margin: 0 auto 0.5rem; background:linear-gradient(135deg, #f59e0b, #d97706);"><i class="fa-solid fa-star"></i></div>
-      <h2 class="modal-title" id="rating-modal-title">Rate & Review</h2>
-      <p style="font-size:0.88rem; color:var(--text-muted);" id="rating-modal-subtitle">How was your experience working with the user?</p>
 
-      <!-- 5 Interactive Stars -->
-      <div class="rating-stars-input" id="rating-stars-container">
-        <i class="fa-solid fa-star star active" data-value="1" onclick="setRatingValue(1)"></i>
-        <i class="fa-solid fa-star star active" data-value="2" onclick="setRatingValue(2)"></i>
-        <i class="fa-solid fa-star star active" data-value="3" onclick="setRatingValue(3)"></i>
-        <i class="fa-solid fa-star star active" data-value="4" onclick="setRatingValue(4)"></i>
-        <i class="fa-solid fa-star star active" data-value="5" onclick="setRatingValue(5)"></i>
+      <p style="font-size:0.9rem; color:var(--text-muted);" id="modal-rating-prompt">
+        How was your experience working together on this task?
+      </p>
+
+      <!-- 5-Star Interactive Selector -->
+      <div class="rating-stars-input" id="rating-stars-group">
+        <i class="fa-solid fa-star star active" data-rating="1" onclick="setStarRating(1)"></i>
+        <i class="fa-solid fa-star star active" data-rating="2" onclick="setStarRating(2)"></i>
+        <i class="fa-solid fa-star star active" data-rating="3" onclick="setStarRating(3)"></i>
+        <i class="fa-solid fa-star star active" data-rating="4" onclick="setStarRating(4)"></i>
+        <i class="fa-solid fa-star star active" data-rating="5" onclick="setStarRating(5)"></i>
       </div>
-      <div style="font-weight:700; color:var(--accent); margin-bottom:1rem;" id="rating-text-value">5.0 — Excellent!</div>
 
-      <textarea id="rating-review-text" class="form-control" placeholder="Write an honest review (e.g. Prompt payment, very clear requirements, friendly environment)..." rows="3"></textarea>
+      <div class="form-group" style="margin-bottom:1.5rem;">
+        <label class="form-label">Written Feedback</label>
+        <textarea id="rating-review-text" class="form-control" rows="3" placeholder="Share honest feedback about punctuality, quality, and communication..."></textarea>
+      </div>
 
-      <div style="margin-top:1.5rem; display:flex; gap:0.75rem; justify-content:center;">
+      <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
         <button class="btn btn-outline" onclick="closeModal('modal-rating')">Skip</button>
-        <button class="btn btn-primary" onclick="submitRatingReview()"><i class="fa-solid fa-check"></i> Submit Rating</button>
+        <button class="btn btn-primary" onclick="submitRatingReview()"><i class="fa-solid fa-paper-plane"></i> Submit Review</button>
       </div>
     </div>
   </div>
 
-  <!-- 4. Notifications Modal -->
+  <!-- 5. Notifications Feed Modal -->
   <div id="modal-notifications" class="modal-overlay">
-    <div class="modal-card" style="max-width:520px;">
+    <div class="modal-card">
       <div class="modal-header">
-        <h2 class="modal-title"><i class="fa-solid fa-bell"></i> Notifications</h2>
+        <h2 class="modal-title"><i class="fa-solid fa-bell text-primary"></i> Notifications</h2>
         <button class="modal-close-btn" onclick="closeModal('modal-notifications')"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div style="display:flex; justify-content:flex-end; margin-bottom:0.75rem;">
-        <button class="btn btn-outline btn-sm" onclick="markAllNotificationsRead()"><i class="fa-solid fa-check-double"></i> Mark all read</button>
-      </div>
-      <div id="notifications-list-container" style="display:flex; flex-direction:column; gap:0.6rem; max-height:400px; overflow-y:auto;">
-        <!-- Dynamic Notifications -->
+
+      <div class="transactions-list" id="notifications-modal-list">
+        <!-- Dynamic Alerts -->
       </div>
     </div>
   </div>
 
-  <!-- Toast Message Container -->
+  <!-- Toast Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- Scripts -->
+  <!-- JavaScript Libraries & App Core -->
   <script src="js/api.js"></script>
   <script src="js/state.js"></script>
   <script src="js/app.js"></script>

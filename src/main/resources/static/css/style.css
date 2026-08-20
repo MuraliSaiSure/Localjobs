@@ -315,6 +315,323 @@ a {
 }
 
 /* ==========================================================================
+   LANDING PAGE STYLES
+   ========================================================================== */
+.landing-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 35%, #312e81 70%, #4f46e5 100%);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: 4rem 3rem 3.5rem;
+  margin-bottom: 3.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 40px -6px rgba(30, 27, 75, 0.45);
+}
+
+.landing-hero::before {
+  content: '';
+  position: absolute;
+  top: -120px;
+  right: -80px;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, rgba(6, 182, 212, 0.25) 45%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.landing-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  padding: 0.4rem 1.1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e0e7ff;
+  margin-bottom: 1.5rem;
+}
+
+.landing-hero-title {
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  margin-bottom: 1.25rem;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #a5b4fc 0%, #38bdf8 50%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.landing-hero-desc {
+  font-size: 1.12rem;
+  color: #e0e7ff;
+  max-width: 680px;
+  line-height: 1.65;
+  margin-bottom: 2.25rem;
+}
+
+.landing-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 3.5rem;
+}
+
+.landing-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 2rem;
+}
+
+.landing-stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-stat-number {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.02em;
+}
+
+.landing-stat-label {
+  font-size: 0.82rem;
+  color: #c7d2fe;
+  font-weight: 500;
+}
+
+/* Sections Common */
+.landing-section {
+  margin-bottom: 4.5rem;
+}
+
+.landing-section-header {
+  margin-bottom: 2.5rem;
+}
+
+.landing-section-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--secondary);
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+}
+
+.landing-section-desc {
+  font-size: 1rem;
+  color: var(--text-muted);
+  max-width: 580px;
+  margin: 0.5rem auto 0;
+  line-height: 1.6;
+}
+
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-primary { color: var(--primary); }
+.text-success { color: var(--success); }
+.text-accent { color: var(--accent-amber); }
+
+/* Steps Grid */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.75rem;
+}
+
+.step-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem 1.75rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  position: relative;
+}
+
+.step-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.step-icon-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin-bottom: 1.35rem;
+  position: relative;
+}
+
+.step-number {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: var(--secondary);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.step-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--secondary);
+  margin-bottom: 0.65rem;
+}
+
+.step-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* Dual Role Feature Card */
+.landing-dual-role-card {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: 3.25rem 2.75rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+  margin-bottom: 4.5rem;
+  box-shadow: 0 16px 36px -6px rgba(30, 27, 75, 0.35);
+}
+
+.dual-role-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dual-box {
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: var(--radius-md);
+  padding: 1.35rem 1.5rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.dual-box-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.dual-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.dual-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+/* Safety Grid */
+.safety-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.safety-item {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  text-align: center;
+  box-shadow: var(--shadow-xs);
+}
+
+.safety-icon {
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+}
+
+.safety-item h4 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--secondary);
+  margin-bottom: 0.45rem;
+}
+
+.safety-item p {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Landing CTA Banner */
+.landing-cta-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #4f46e5 100%);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: 3.5rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.landing-cta-banner h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.75rem;
+}
+
+.landing-cta-banner p {
+  font-size: 1.05rem;
+  color: #c7d2fe;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
    HERO / BANNER CARDS
    ========================================================================== */
 .hero-banner {
@@ -1471,6 +1788,30 @@ textarea.form-control {
 
   .filter-select {
     flex: 1;
+  }
+
+  .landing-hero {
+    padding: 2.25rem 1.5rem 2rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .landing-hero-title {
+    font-size: 2.1rem;
+  }
+
+  .landing-hero-desc {
+    font-size: 0.95rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .landing-dual-role-card {
+    grid-template-columns: 1fr;
+    padding: 2rem 1.35rem;
+    gap: 1.75rem;
+  }
+
+  .landing-section-title {
+    font-size: 1.6rem;
   }
 }
 

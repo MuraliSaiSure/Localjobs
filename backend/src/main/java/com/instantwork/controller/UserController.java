@@ -35,6 +35,13 @@ public class UserController {
         return ResponseEntity.ok(userService.registerUser(request));
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody com.instantwork.dto.LoginRequest request) {
+        return userService.loginUser(request.getEmailOrPhone(), request.getPassword())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(401).body(null));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<User> updateProfile(@PathVariable Long id, @RequestBody User user) {
         return ResponseEntity.ok(userService.updateUser(id, user));

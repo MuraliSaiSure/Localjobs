@@ -57,6 +57,21 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public Optional<User> loginUser(String emailOrPhone, String password) {
+        if (emailOrPhone == null || emailOrPhone.trim().isEmpty()) {
+            return Optional.empty();
+        }
+        String clean = emailOrPhone.trim();
+        Optional<User> byEmail = userRepository.findByEmail(clean);
+        if (byEmail.isPresent()) {
+            return byEmail;
+        }
+        return userRepository.findAll().stream()
+                .filter(u -> (u.getPhone() != null && u.getPhone().contains(clean)) ||
+                             (u.getEmail() != null && u.getEmail().equalsIgnoreCase(clean)))
+                .findFirst();
+    }
+
     @Transactional
     public User updateUser(Long id, User updatedInfo) {
         User user = userRepository.findById(id)

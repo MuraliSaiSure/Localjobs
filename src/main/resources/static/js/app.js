@@ -38,40 +38,46 @@ async function initApp() {
     const users = await API.getUsers();
     State.allUsers = users || [];
 
-    // 2. Select initial active user (e.g. Murali Sai or stored user)
-    const savedUserId = localStorage.getItem('localjobs_user_id') || localStorage.getItem('instant_work_user_id');
+    // 2. Select initial active user (if stored in localStorage)
+    const savedUserId = localStorage.getItem('localjobs_user_id');
     let initialUser = State.allUsers.find(u => u.id == savedUserId);
-    if (!initialUser && State.allUsers.length > 0) {
-      initialUser = State.allUsers[0];
-    }
     
+    // Set initial user if found
     if (initialUser) {
-      await State.setCurrentUser(initialUser);
+      State.currentUser = initialUser;
+      await State.refreshNotifications();
     }
 
-    // 3. Render Categories scrollbar
+    // 3. Update Navbar based on logged in status
+    updateNavbarState();
+
+    // 4. Render Categories scrollbar
     renderCategoriesBar();
 
-    // 4. Initial Navigation & Data Load
+    // 5. Initial Navigation & Data Load
     renderHeaderProfile();
     
-    // Check if initial hash is set (e.g., #admin, #mytasks, #find)
+    // Check URL Hash (e.g. #landing, #admin, #mytasks, #find)
     const initialHash = window.location.hash.replace('#', '').trim();
-    if (initialHash && ['home', 'find', 'post', 'mytasks', 'earnings', 'profile', 'admin'].includes(initialHash)) {
+    if (initialHash && ['landing', 'home', 'find', 'post', 'mytasks', 'earnings', 'profile', 'admin'].includes(initialHash)) {
       navigateTo(initialHash);
     } else {
-      await loadHomeScreenData();
+      if (State.currentUser) {
+        navigateTo('home');
+      } else {
+        navigateTo('landing');
+      }
     }
 
     // Hash change listener
     window.addEventListener('hashchange', () => {
       const hash = window.location.hash.replace('#', '').trim();
-      if (hash && ['home', 'find', 'post', 'mytasks', 'earnings', 'profile', 'admin'].includes(hash)) {
+      if (hash && ['landing', 'home', 'find', 'post', 'mytasks', 'earnings', 'profile', 'admin'].includes(hash)) {
         navigateTo(hash);
       }
     });
 
-    // 5. Subscribe to State Changes
+    // 6. Subscribe to State Changes
     State.subscribe(onStateChange);
 
   } catch (error) {
@@ -80,10 +86,47 @@ async function initApp() {
   }
 }
 
+function updateNavbarState() {
+  const isLoggedIn = !!State.currentUser;
+  const navGuest = document.getElementById('nav-guest');
+  const navUser = document.getElementById('nav-user');
+  const guestActions = document.getElementById('header-guest-actions');
+  const userActions = document.getElementById('header-user-actions');
+
+  if (navGuest) navGuest.style.display = isLoggedIn ? 'none' : 'flex';
+  if (navUser) navUser.style.display = isLoggedIn ? 'flex' : 'none';
+  if (guestActions) guestActions.style.display = isLoggedIn ? 'none' : 'flex';
+  if (userActions) userActions.style.display = isLoggedIn ? 'flex' : 'none';
+}
+
+function handleBrandClick() {
+  if (State.currentUser) {
+    navigateTo('home');
+  } else {
+    navigateTo('landing');
+  }
+}
+
+function scrollToSection(sectionId) {
+  if (State.activeScreen !== 'landing') {
+    navigateTo('landing');
+  }
+  setTimeout(() => {
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 100);
+}
+
 function onStateChange(event, payload) {
   if (event === 'USER_CHANGED' || event === 'USER_UPDATED') {
+    updateNavbarState();
     renderHeaderProfile();
     refreshActiveScreenData();
+  } else if (event === 'USER_LOGGED_OUT') {
+    updateNavbarState();
+    navigateTo('landing');
   } else if (event === 'SCREEN_CHANGED') {
     updateNavSelection(payload);
     refreshActiveScreenData();
@@ -125,6 +168,9 @@ function updateNavSelection(screenName) {
 
 function refreshActiveScreenData() {
   switch (State.activeScreen) {
+    case 'landing':
+      loadLandingPageData();
+      break;
     case 'home':
       loadHomeScreenData();
       break;
@@ -1119,5 +1165,173 @@ async function handleAdminDeleteTask(taskId) {
       showToast('Error deleting task', 'error');
     }
   }
+}
+
+// ============================================================================
+// 8. LANDING PAGE & AUTHENTICATION (SIGN IN & REGISTER)
+// ============================================================================
+async function loadLandingPageData() {
+  const container = document.getElementById('landing-tasks-preview-grid');
+  if (!container) return;
+
+  try {
+    const tasks = await API.getTasks({ status: 'OPEN' });
+    const previewTasks = (tasks || []).slice(0, 4);
+
+    if (previewTasks.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <i class="fa-solid fa-briefcase empty-icon"></i>
+          <div class="empty-title">Fresh Tasks Coming Soon</div>
+          <div class="empty-desc">New micro-tasks are posted regularly by nearby businesses and neighbors.</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = previewTasks.map(t => `
+      <div class="task-card">
+        <div>
+          <div class="task-card-header">
+            <span class="task-category-tag">${t.category}</span>
+            <span class="task-reward-badge">₹${t.reward}</span>
+          </div>
+
+          <h3 class="task-title">${t.title}</h3>
+          <p class="task-desc-clamp">${t.description || 'Flexible local micro-task in your neighborhood.'}</p>
+
+          <div class="task-meta-list">
+            <div class="task-meta-item"><i class="fa-solid fa-clock"></i> <span>${t.duration}</span></div>
+            <div class="task-meta-item"><i class="fa-solid fa-calendar-day"></i> <span>${t.scheduleText || 'Today'}</span></div>
+            <div class="task-meta-item"><i class="fa-solid fa-location-dot"></i> <span>${t.location}</span></div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem; padding-top:0.75rem; border-top:1px solid var(--border-subtle);">
+          <div class="poster-mini-info">
+            <img src="${t.posterAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + t.posterName}" class="poster-mini-avatar" alt="${t.posterName}">
+            <div>
+              <div class="poster-mini-name">${t.posterName} <i class="fa-solid fa-circle-check verified-icon"></i></div>
+              <div class="poster-mini-rating"><i class="fa-solid fa-star"></i> ${t.posterRating || '5.0'}</div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="handleLandingTaskClick(${t.id})">
+            Accept & Earn
+          </button>
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Failed to load landing tasks preview:', error);
+  }
+}
+
+function handleLandingTaskClick(taskId) {
+  if (!State.currentUser) {
+    openAuthModal('login');
+    showToast('Please sign in or create an account to accept tasks', 'info');
+  } else {
+    openTaskModal(taskId);
+  }
+}
+
+function openAuthModal(tab = 'login') {
+  switchAuthTab(tab);
+  openModal('modal-auth');
+}
+
+function switchAuthTab(tab) {
+  const isLogin = tab === 'login';
+  const tabLogin = document.getElementById('tab-auth-login');
+  const tabReg = document.getElementById('tab-auth-register');
+  const viewLogin = document.getElementById('auth-login-view');
+  const viewReg = document.getElementById('auth-register-view');
+  const title = document.getElementById('auth-modal-title');
+
+  if (tabLogin) tabLogin.classList.toggle('active', isLogin);
+  if (tabReg) tabReg.classList.toggle('active', !isLogin);
+  if (viewLogin) viewLogin.style.display = isLogin ? 'block' : 'none';
+  if (viewReg) viewReg.style.display = isLogin ? 'none' : 'block';
+  if (title) title.textContent = isLogin ? 'Sign In to LocalJobs' : 'Create Dual-Role Account';
+}
+
+async function handleLoginSubmit(event) {
+  event.preventDefault();
+  const identifier = document.getElementById('login-identifier').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  try {
+    const user = await API.loginUser(identifier, password);
+    if (user && user.id) {
+      await State.setCurrentUser(user);
+      closeModal('modal-auth');
+      showToast(`Welcome back, ${user.name}! 👋`, 'success');
+      navigateTo('home');
+    } else {
+      showToast('User not found. Try a demo persona or create an account.', 'error');
+    }
+  } catch (error) {
+    showToast('Login failed. Please check your email/phone.', 'error');
+  }
+}
+
+async function quickDemoLogin(email) {
+  try {
+    let user = State.allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (!user) {
+      user = await API.loginUser(email, 'password123');
+    }
+    if (user) {
+      await State.setCurrentUser(user);
+      closeModal('modal-auth');
+      showToast(`Logged in as ${user.name} ⚡`, 'success');
+      navigateTo('home');
+    }
+  } catch (error) {
+    showToast('Failed to log in with demo persona', 'error');
+  }
+}
+
+async function handleRegisterSubmit(event) {
+  event.preventDefault();
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const location = document.getElementById('reg-location').value.trim();
+  const skillsInput = document.getElementById('reg-skills').value.trim();
+  const bio = document.getElementById('reg-bio').value.trim();
+
+  const skills = skillsInput ? skillsInput.split(',').map(s => s.trim()).filter(Boolean) : ['General Work'];
+
+  const payload = {
+    name,
+    email,
+    phone,
+    location,
+    latitude: 15.5057 + (Math.random() - 0.5) * 0.02,
+    longitude: 80.0499 + (Math.random() - 0.5) * 0.02,
+    skills,
+    bio: bio || 'Local member ready for micro-tasks and neighborhood gigs.'
+  };
+
+  try {
+    const user = await API.registerUser(payload);
+    if (user && user.id) {
+      const refreshedUsers = await API.getUsers();
+      State.allUsers = refreshedUsers || [];
+      await State.setCurrentUser(user);
+      closeModal('modal-auth');
+      showToast(`Account created! Welcome to LocalJobs, ${user.name}! 🎉`, 'success');
+      navigateTo('home');
+    }
+  } catch (error) {
+    showToast('Registration failed. Please check details.', 'error');
+  }
+}
+
+function handleLogout() {
+  State.logout();
+  showToast('You have been signed out.', 'info');
+  navigateTo('landing');
 }
 

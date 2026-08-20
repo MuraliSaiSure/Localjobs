@@ -30,9 +30,23 @@ const State = {
 
   async setCurrentUser(user) {
     this.currentUser = user;
-    localStorage.setItem('localjobs_user_id', user.id);
+    if (user) {
+      localStorage.setItem('localjobs_user_id', user.id);
+    } else {
+      localStorage.removeItem('localjobs_user_id');
+    }
     this.notify('USER_CHANGED', user);
-    await this.refreshNotifications();
+    if (user) {
+      await this.refreshNotifications();
+    }
+  },
+
+  logout() {
+    this.currentUser = null;
+    localStorage.removeItem('localjobs_user_id');
+    this.notifications = [];
+    this.unreadNotifsCount = 0;
+    this.notify('USER_LOGGED_OUT', null);
   },
 
   async refreshCurrentUser() {

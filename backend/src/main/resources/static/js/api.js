@@ -40,6 +40,18 @@ const API = {
     return res.json();
   },
 
+  async loginUser(emailOrPhone, password) {
+    const res = await fetch(`${API_BASE}/api/users/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emailOrPhone, password })
+    });
+    if (!res.ok) {
+      throw new Error('Invalid email or password');
+    }
+    return res.json();
+  },
+
   async updateUser(id, userData) {
     const res = await fetch(`${API_BASE}/api/users/${id}`, {
       method: 'PUT',
