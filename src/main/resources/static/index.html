@@ -55,8 +55,8 @@
         <button class="nav-link" data-screen="profile" onclick="navigateTo('profile')">
           <i class="fa-solid fa-user"></i> Profile
         </button>
-        <button class="nav-link" data-screen="admin" onclick="navigateTo('admin')" style="color: #7e22ce;">
-          <i class="fa-solid fa-shield-halved"></i> Admin
+        <button class="nav-link" data-screen="admin" onclick="navigateTo('admin')" style="background:#f3e8ff; color:#7e22ce; border: 1px solid #d8b4fe; font-weight:700;">
+          <i class="fa-solid fa-shield-halved"></i> Admin Panel
         </button>
       </nav>
 
@@ -101,6 +101,9 @@
           </button>
           <button class="btn btn-outline-white" onclick="navigateTo('post')">
             <i class="fa-solid fa-plus"></i> Post a Task
+          </button>
+          <button class="btn btn-outline-white" onclick="navigateTo('admin')" style="background:rgba(126,34,206,0.3); border-color:#e9d5ff;">
+            <i class="fa-solid fa-shield-halved"></i> Admin Panel
           </button>
         </div>
       </div>
@@ -442,6 +445,7 @@
 
         <div style="display:flex; flex-direction:column; gap:0.5rem;">
           <button class="btn btn-outline" onclick="openPersonaModal()"><i class="fa-solid fa-user-gear"></i> Switch Persona</button>
+          <button class="btn btn-primary" onclick="navigateTo('admin')" style="background:#7e22ce; border-color:#6b21a8;"><i class="fa-solid fa-shield-halved"></i> Open Admin Panel</button>
         </div>
       </div>
 
@@ -590,6 +594,10 @@
     <button class="mobile-nav-item" data-screen="profile" onclick="navigateTo('profile')">
       <i class="fa-solid fa-user"></i>
       <span>Profile</span>
+    </button>
+    <button class="mobile-nav-item" data-screen="admin" onclick="navigateTo('admin')" style="color: #7e22ce;">
+      <i class="fa-solid fa-shield-halved"></i>
+      <span>Admin</span>
     </button>
   </nav>
 

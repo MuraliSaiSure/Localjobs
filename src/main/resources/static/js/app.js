@@ -54,7 +54,22 @@ async function initApp() {
 
     // 4. Initial Navigation & Data Load
     renderHeaderProfile();
-    await loadHomeScreenData();
+    
+    // Check if initial hash is set (e.g., #admin, #mytasks, #find)
+    const initialHash = window.location.hash.replace('#', '').trim();
+    if (initialHash && ['home', 'find', 'post', 'mytasks', 'earnings', 'profile', 'admin'].includes(initialHash)) {
+      navigateTo(initialHash);
+    } else {
+      await loadHomeScreenData();
+    }
+
+    // Hash change listener
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash && ['home', 'find', 'post', 'mytasks', 'earnings', 'profile', 'admin'].includes(hash)) {
+        navigateTo(hash);
+      }
+    });
 
     // 5. Subscribe to State Changes
     State.subscribe(onStateChange);
@@ -93,6 +108,9 @@ function navigateTo(screenName) {
   // Update navigation items
   updateNavSelection(screenName);
   State.setScreen(screenName);
+  if (window.location.hash.replace('#', '') !== screenName) {
+    history.pushState(null, null, `#${screenName}`);
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
